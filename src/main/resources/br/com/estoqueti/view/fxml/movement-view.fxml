@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.estoqueti.controller.MovementController"
+            styleClass="module-root">
+    <center>
+        <GridPane hgap="22.0" vgap="0.0">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="60.0" />
+                <ColumnConstraints percentWidth="40.0" />
+            </columnConstraints>
+
+            <VBox spacing="16.0" styleClass="content-card" GridPane.columnIndex="0">
+                <padding>
+                    <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
+                </padding>
+                <Label text="Historico de Movimentacoes" styleClass="panel-title" />
+                <Label fx:id="accessHintLabel" styleClass="field-value" wrapText="true" />
+
+                <GridPane hgap="12.0" vgap="14.0" styleClass="form-grid">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50.0" />
+                        <ColumnConstraints percentWidth="50.0" />
+                    </columnConstraints>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                        <Label text="Equipamento" styleClass="field-label" />
+                        <ComboBox fx:id="equipmentFilterComboBox" promptText="Todos os equipamentos" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                        <Label text="Tipo de movimentacao" styleClass="field-label" />
+                        <ComboBox fx:id="movementTypeFilterComboBox" promptText="Todos os tipos" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                        <Label text="Data inicial" styleClass="field-label" />
+                        <DatePicker fx:id="movementFromDatePicker" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                        <Label text="Data final" styleClass="field-label" />
+                        <DatePicker fx:id="movementToDatePicker" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                    </VBox>
+                </GridPane>
+
+                <HBox spacing="10.0">
+                    <Button text="Aplicar filtros" onAction="#handleSearch" styleClass="primary-button" />
+                    <Button text="Limpar filtros" onAction="#handleClearFilters" styleClass="secondary-button" />
+                    <Label fx:id="resultsSummaryLabel" styleClass="helper-label" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
+                </HBox>
+
+                <TableView fx:id="movementTable" VBox.vgrow="ALWAYS" styleClass="table-card">
+                    <columns>
+                        <TableColumn fx:id="movementAtColumn" text="Data/Hora" prefWidth="135.0" />
+                        <TableColumn fx:id="movementTypeColumn" text="Tipo" prefWidth="150.0" />
+                        <TableColumn fx:id="equipmentColumn" text="Equipamento" prefWidth="250.0" />
+                        <TableColumn fx:id="quantityColumn" text="Qtd." prefWidth="65.0" />
+                        <TableColumn fx:id="sourceColumn" text="Origem" prefWidth="130.0" />
+                        <TableColumn fx:id="destinationColumn" text="Destino" prefWidth="130.0" />
+                        <TableColumn fx:id="responsibleColumn" text="Responsavel" prefWidth="150.0" />
+                        <TableColumn fx:id="performedByColumn" text="Registrado por" prefWidth="120.0" />
+                    </columns>
+                </TableView>
+            </VBox>
+
+            <VBox spacing="18.0" styleClass="content-card" GridPane.columnIndex="1">
+                <padding>
+                    <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
+                </padding>
+                <Label text="Nova Movimentacao" styleClass="panel-title" />
+                <Label fx:id="equipmentSummaryLabel" styleClass="summary-card" wrapText="true" />
+                <Label fx:id="rulesHintLabel" styleClass="summary-card muted" wrapText="true" />
+
+                <VBox fx:id="formFieldsContainer" spacing="16.0">
+                    <GridPane hgap="12.0" vgap="14.0" styleClass="form-grid">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50.0" />
+                            <ColumnConstraints percentWidth="50.0" />
+                        </columnConstraints>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="0" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                            <Label text="Equipamento" styleClass="field-label" />
+                            <ComboBox fx:id="movementEquipmentComboBox" promptText="Selecione o item movimentado" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                            <Label text="Tipo de movimentacao" styleClass="field-label" />
+                            <ComboBox fx:id="movementTypeComboBox" promptText="Selecione" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                            <Label text="Quantidade" styleClass="field-label" />
+                            <TextField fx:id="quantityField" promptText="Ex.: 1" styleClass="input-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="2" GridPane.columnIndex="0">
+                            <Label text="Origem" styleClass="field-label" />
+                            <ComboBox fx:id="sourceLocationComboBox" promptText="Selecione" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                            <Label text="Destino" styleClass="field-label" />
+                            <ComboBox fx:id="destinationLocationComboBox" promptText="Selecione" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                            <Label text="Responsavel pela movimentacao" styleClass="field-label" />
+                            <TextField fx:id="responsibleNameField" promptText="Ex.: Equipe Infra ou colaborador responsavel" styleClass="input-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="4" GridPane.columnIndex="0">
+                            <Label text="Data" styleClass="field-label" />
+                            <DatePicker fx:id="movementDatePicker" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="4" GridPane.columnIndex="1">
+                            <Label text="Horario" styleClass="field-label" />
+                            <TextField fx:id="movementTimeField" promptText="HH:mm" styleClass="input-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                            <Label text="Observacoes" styleClass="field-label" />
+                            <TextArea fx:id="notesArea" promptText="Detalhes da operacao, chamado, motivo ou contexto" prefRowCount="4" styleClass="input-field text-area-field" wrapText="true" />
+                        </VBox>
+                    </GridPane>
+                </VBox>
+
+                <Label fx:id="formStatusLabel" wrapText="true" styleClass="form-status-neutral" />
+
+                <HBox spacing="10.0">
+                    <Button fx:id="registerMovementButton" text="Registrar movimentacao" onAction="#handleRegisterMovement" styleClass="primary-button" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
+                    <Button text="Limpar" onAction="#handleClearForm" styleClass="secondary-button" />
+                </HBox>
+            </VBox>
+        </GridPane>
+    </center>
+</BorderPane>

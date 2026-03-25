@@ -1,0 +1,169 @@
+package br.com.estoqueti.controller;
+
+import br.com.estoqueti.dto.auth.AuthenticatedUserDto;
+import br.com.estoqueti.dto.user.UserCreateRequest;
+import br.com.estoqueti.dto.user.UserListItemDto;
+import br.com.estoqueti.exception.BusinessException;
+import br.com.estoqueti.model.enums.Role;
+import br.com.estoqueti.service.UserService;
+import br.com.estoqueti.session.UserSession;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+
+import java.time.format.DateTimeFormatter;
+
+public class UserController {
+
+    private static final DateTimeFormatter LAST_LOGIN_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    private final UserService userService = new UserService();
+
+    @FXML
+    private TableView<UserListItemDto> userTable;
+
+    @FXML
+    private TableColumn<UserListItemDto, String> fullNameColumn;
+
+    @FXML
+    private TableColumn<UserListItemDto, String> usernameColumn;
+
+    @FXML
+    private TableColumn<UserListItemDto, String> roleColumn;
+
+    @FXML
+    private TableColumn<UserListItemDto, String> statusColumn;
+
+    @FXML
+    private TableColumn<UserListItemDto, String> lastLoginColumn;
+
+    @FXML
+    private TextField fullNameField;
+
+    @FXML
+    private TextField usernameField;
+
+    @FXML
+    private ComboBox<Role> roleComboBox;
+
+    @FXML
+    private PasswordField passwordField;
+
+    @FXML
+    private PasswordField confirmPasswordField;
+
+    @FXML
+    private CheckBox activeCheckBox;
+
+    @FXML
+    private Button saveUserButton;
+
+    @FXML
+    private Label formStatusLabel;
+
+    @FXML
+    private Label accessHintLabel;
+
+    @FXML
+    public void initialize() {
+        configureTable();
+        roleComboBox.setItems(FXCollections.observableArrayList(Role.values()));
+        roleComboBox.getSelectionModel().select(Role.TECNICO);
+        activeCheckBox.setSelected(true);
+        formStatusLabel.setText("Cadastre usuarios com perfis compativeis com a rotina da equipe.");
+        applyStatusStyle("form-status-neutral");
+        configurePermissions();
+        loadUsers();
+    }
+
+    @FXML
+    private void handleCreateUser() {
+        if (!passwordField.getText().equals(confirmPasswordField.getText())) {
+            formStatusLabel.setText("A confirmacao da senha nao confere.");
+            applyStatusStyle("form-status-error");
+            return;
+        }
+
+        try {
+            UserListItemDto createdUser = userService.createUser(
+                    new UserCreateRequest(
+                            fullNameField.getText(),
+                            usernameField.getText(),
+                            passwordField.getText(),
+                            roleComboBox.getValue(),
+                            activeCheckBox.isSelected()
+                    ),
+                    UserSession.requireAuthenticatedUser()
+            );
+
+            formStatusLabel.setText("Usuario cadastrado com sucesso: " + createdUser.username());
+            applyStatusStyle("form-status-success");
+            clearForm();
+            loadUsers();
+        } catch (BusinessException exception) {
+            formStatusLabel.setText(exception.getMessage());
+            applyStatusStyle("form-status-error");
+        }
+    }
+
+    @FXML
+    private void handleClearForm() {
+        clearForm();
+        formStatusLabel.setText("Formulario limpo. Informe os dados do novo usuario.");
+        applyStatusStyle("form-status-neutral");
+    }
+
+    private void configureTable() {
+        fullNameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().fullName()));
+        usernameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().username()));
+        roleColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().role().getDisplayName()));
+        statusColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().active() ? "Ativo" : "Inativo"));
+        lastLoginColumn.setCellValueFactory(data -> new SimpleStringProperty(
+                data.getValue().lastLoginAt() == null ? "Nunca acessou" : LAST_LOGIN_FORMATTER.format(data.getValue().lastLoginAt())
+        ));
+    }
+
+    private void configurePermissions() {
+        AuthenticatedUserDto authenticatedUser = UserSession.requireAuthenticatedUser();
+        boolean canManageUsers = authenticatedUser.canManageUsers();
+
+        accessHintLabel.setText(canManageUsers
+                ? "Voce esta autenticado como administrador e pode cadastrar novos usuarios."
+                : "Seu perfil possui acesso somente de consulta para usuarios.");
+
+        fullNameField.setDisable(!canManageUsers);
+        usernameField.setDisable(!canManageUsers);
+        roleComboBox.setDisable(!canManageUsers);
+        passwordField.setDisable(!canManageUsers);
+        confirmPasswordField.setDisable(!canManageUsers);
+        activeCheckBox.setDisable(!canManageUsers);
+        saveUserButton.setDisable(!canManageUsers);
+    }
+
+    private void loadUsers() {
+        userTable.setItems(FXCollections.observableArrayList(userService.listUsers()));
+    }
+
+    private void clearForm() {
+        fullNameField.clear();
+        usernameField.clear();
+        passwordField.clear();
+        confirmPasswordField.clear();
+        roleComboBox.getSelectionModel().select(Role.TECNICO);
+        activeCheckBox.setSelected(true);
+    }
+
+    private void applyStatusStyle(String styleClass) {
+        formStatusLabel.getStyleClass().removeAll("form-status-neutral", "form-status-error", "form-status-success");
+        formStatusLabel.getStyleClass().add(styleClass);
+    }
+}
+

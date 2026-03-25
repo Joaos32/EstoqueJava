@@ -1,0 +1,18 @@
+# Copie este arquivo para application-local.properties quando quiser manter configuracoes locais fora do versionamento.
+# Tambem e possivel sobrescrever qualquer propriedade por variavel de ambiente usando o prefixo ESTOQUETI_.
+# Exemplo: ESTOQUETI_DATABASE_PASSWORD=123456
+
+app.name=EstoqueTI Desktop
+app.version=1.0.0-SNAPSHOT
+
+database.driver-class-name=org.postgresql.Driver
+database.url=jdbc:postgresql://localhost:5432/estoqueti
+database.username=postgres
+database.password=123456
+database.schema=estoque_ti
+
+database.hikari.pool-name=EstoqueTIHikariPool
+database.hikari.minimum-idle=2
+database.hikari.maximum-pool-size=10
+
+hibernate.show-sql=false

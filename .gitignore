@@ -1,0 +1,17 @@
+target/
+.idea/
+.vscode/
+*.iml
+*.log
+*.tmp
+*.orig
+.classpath
+.project
+.settings/
+.factorypath
+.tools/
+out/
+Thumbs.db
+.DS_Store
+hs_err_pid*
+src/main/resources/application-local.properties

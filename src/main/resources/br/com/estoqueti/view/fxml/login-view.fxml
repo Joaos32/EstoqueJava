@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.estoqueti.controller.LoginController"
+            prefWidth="1040.0"
+            prefHeight="720.0"
+            styleClass="login-root">
+    <center>
+        <GridPane hgap="0.0" BorderPane.alignment="CENTER">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="53.0" />
+                <ColumnConstraints percentWidth="47.0" />
+            </columnConstraints>
+
+            <StackPane GridPane.columnIndex="0" styleClass="login-brand-panel">
+                <VBox spacing="22.0" styleClass="login-brand-card">
+                    <Label text="ESTOQUETI DESKTOP" styleClass="eyebrow-label" />
+                    <Label text="Controle corporativo de estoque de TI com autenticacao, perfis de acesso e base pronta para crescer." styleClass="login-hero-title" wrapText="true" />
+                    <Label text="Nesta etapa, o sistema ja valida usuario e senha com BCrypt, grava auditoria de login e abre a area autenticada com base no perfil do usuario." styleClass="login-hero-subtitle" wrapText="true" />
+                    <VBox spacing="12.0">
+                        <Label text="O que esta ativo agora" styleClass="field-label dark" />
+                        <Label text="Login real no PostgreSQL" styleClass="login-bullet" />
+                        <Label text="Perfis ADMIN, TECNICO e VISUALIZADOR" styleClass="login-bullet" />
+                        <Label text="Cadastro e consulta de usuarios" styleClass="login-bullet" />
+                        <Label text="Auditoria de acessos" styleClass="login-bullet" />
+                    </VBox>
+                </VBox>
+            </StackPane>
+
+            <StackPane GridPane.columnIndex="1">
+                <VBox spacing="18.0" styleClass="login-form-card">
+                    <Label text="Acesso ao Sistema" styleClass="panel-title" />
+                    <Label text="Entre com suas credenciais para acessar os modulos corporativos." styleClass="field-value" wrapText="true" />
+
+                    <VBox spacing="8.0">
+                        <Label text="Usuario" styleClass="field-label" />
+                        <TextField fx:id="usernameField" promptText="Digite seu login" styleClass="input-field" onAction="#handleLogin" />
+                    </VBox>
+
+                    <VBox spacing="8.0">
+                        <Label text="Senha" styleClass="field-label" />
+                        <PasswordField fx:id="passwordField" promptText="Digite sua senha" styleClass="input-field" onAction="#handleLogin" />
+                    </VBox>
+
+                    <Label fx:id="statusLabel" wrapText="true" styleClass="form-status-neutral" />
+
+                    <Button fx:id="loginButton" text="Entrar" onAction="#handleLogin" styleClass="primary-button" maxWidth="1.7976931348623157E308" />
+
+                    <HBox alignment="CENTER_LEFT" spacing="12.0">
+                        <Label text="Banco" styleClass="field-label" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label text="PostgreSQL + Hibernate + HikariCP" styleClass="session-chip" />
+                    </HBox>
+                </VBox>
+            </StackPane>
+        </GridPane>
+    </center>
+</BorderPane>

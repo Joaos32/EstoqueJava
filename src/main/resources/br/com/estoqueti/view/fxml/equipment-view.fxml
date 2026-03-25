@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.estoqueti.controller.EquipmentController"
+            styleClass="module-root">
+    <center>
+        <GridPane hgap="22.0" vgap="0.0">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="61.0" />
+                <ColumnConstraints percentWidth="39.0" />
+            </columnConstraints>
+
+            <VBox spacing="16.0" styleClass="content-card" GridPane.columnIndex="0">
+                <padding>
+                    <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
+                </padding>
+                <Label text="Consulta de Equipamentos" styleClass="panel-title" />
+                <Label fx:id="accessHintLabel" styleClass="field-value" wrapText="true" />
+
+                <GridPane hgap="12.0" vgap="14.0" styleClass="form-grid">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50.0" />
+                        <ColumnConstraints percentWidth="50.0" />
+                    </columnConstraints>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                        <Label text="Nome" styleClass="field-label" />
+                        <TextField fx:id="nameFilterField" promptText="Buscar por nome" styleClass="input-field" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                        <Label text="Codigo interno" styleClass="field-label" />
+                        <TextField fx:id="internalCodeFilterField" promptText="Ex.: NTB-0001" styleClass="input-field" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                        <Label text="Patrimonio" styleClass="field-label" />
+                        <TextField fx:id="patrimonyFilterField" promptText="Ex.: PAT-1001" styleClass="input-field" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                        <Label text="Numero de serie" styleClass="field-label" />
+                        <TextField fx:id="serialNumberFilterField" promptText="Buscar por serie" styleClass="input-field" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="2" GridPane.columnIndex="0">
+                        <Label text="Categoria" styleClass="field-label" />
+                        <ComboBox fx:id="categoryFilterComboBox" promptText="Todas as categorias" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                        <Label text="Status" styleClass="field-label" />
+                        <ComboBox fx:id="statusFilterComboBox" promptText="Todos os status" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="3" GridPane.columnIndex="0">
+                        <Label text="Localizacao" styleClass="field-label" />
+                        <ComboBox fx:id="locationFilterComboBox" promptText="Todos os locais" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                        <Label text="Responsavel" styleClass="field-label" />
+                        <TextField fx:id="responsibleFilterField" promptText="Buscar por responsavel" styleClass="input-field" />
+                    </VBox>
+                </GridPane>
+
+                <HBox spacing="10.0">
+                    <Button text="Aplicar filtros" onAction="#handleSearch" styleClass="primary-button" />
+                    <Button text="Limpar filtros" onAction="#handleClearFilters" styleClass="secondary-button" />
+                    <Label fx:id="resultsSummaryLabel" styleClass="helper-label" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
+                </HBox>
+
+                <TableView fx:id="equipmentTable" VBox.vgrow="ALWAYS" styleClass="table-card">
+                    <columns>
+                        <TableColumn fx:id="internalCodeColumn" text="Codigo" prefWidth="110.0" />
+                        <TableColumn fx:id="nameColumn" text="Equipamento" prefWidth="220.0" />
+                        <TableColumn fx:id="categoryColumn" text="Categoria" prefWidth="120.0" />
+                        <TableColumn fx:id="statusColumn" text="Status" prefWidth="130.0" />
+                        <TableColumn fx:id="quantityColumn" text="Qtd." prefWidth="70.0" />
+                        <TableColumn fx:id="minimumStockColumn" text="Min." prefWidth="70.0" />
+                        <TableColumn fx:id="locationColumn" text="Localizacao" prefWidth="150.0" />
+                        <TableColumn fx:id="responsibleColumn" text="Responsavel" prefWidth="150.0" />
+                        <TableColumn fx:id="entryDateColumn" text="Entrada" prefWidth="95.0" />
+                    </columns>
+                </TableView>
+            </VBox>
+
+            <VBox spacing="18.0" styleClass="content-card" GridPane.columnIndex="1">
+                <padding>
+                    <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
+                </padding>
+                <Label text="Novo Equipamento" styleClass="panel-title" />
+
+                <VBox fx:id="formFieldsContainer" spacing="16.0">
+                    <GridPane hgap="12.0" vgap="14.0" styleClass="form-grid">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50.0" />
+                            <ColumnConstraints percentWidth="50.0" />
+                        </columnConstraints>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                            <Label text="Codigo interno" styleClass="field-label" />
+                            <TextField fx:id="internalCodeField" promptText="Ex.: MON-0021" styleClass="input-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                            <Label text="Categoria" styleClass="field-label" />
+                            <ComboBox fx:id="categoryComboBox" promptText="Selecione" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="1" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                            <Label text="Nome do equipamento" styleClass="field-label" />
+                            <TextField fx:id="equipmentNameField" promptText="Ex.: Monitor Dell 24 Polegadas" styleClass="input-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="2" GridPane.columnIndex="0">
+                            <Label text="Marca" styleClass="field-label" />
+                            <TextField fx:id="brandField" promptText="Ex.: Dell" styleClass="input-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                            <Label text="Modelo" styleClass="field-label" />
+                            <TextField fx:id="modelField" promptText="Ex.: P2422H" styleClass="input-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="3" GridPane.columnIndex="0">
+                            <Label text="Numero de serie" styleClass="field-label" />
+                            <TextField fx:id="serialNumberField" promptText="Opcional" styleClass="input-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="3" GridPane.columnIndex="1">
+                            <Label text="Numero de patrimonio" styleClass="field-label" />
+                            <TextField fx:id="patrimonyNumberField" promptText="Opcional" styleClass="input-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="4" GridPane.columnIndex="0">
+                            <Label text="Quantidade" styleClass="field-label" />
+                            <TextField fx:id="quantityField" promptText="Ex.: 10" styleClass="input-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="4" GridPane.columnIndex="1">
+                            <Label text="Estoque minimo" styleClass="field-label" />
+                            <TextField fx:id="minimumStockField" promptText="Ex.: 2" styleClass="input-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="5" GridPane.columnIndex="0">
+                            <Label text="Status" styleClass="field-label" />
+                            <ComboBox fx:id="statusComboBox" promptText="Selecione" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="5" GridPane.columnIndex="1">
+                            <Label text="Localizacao" styleClass="field-label" />
+                            <ComboBox fx:id="locationComboBox" promptText="Selecione" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="6" GridPane.columnIndex="0">
+                            <Label text="Responsavel" styleClass="field-label" />
+                            <TextField fx:id="responsibleNameField" promptText="Ex.: Equipe Infra" styleClass="input-field" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="6" GridPane.columnIndex="1">
+                            <Label text="Fornecedor" styleClass="field-label" />
+                            <ComboBox fx:id="supplierComboBox" promptText="Opcional" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="7" GridPane.columnIndex="0">
+                            <Label text="Data de entrada" styleClass="field-label" />
+                            <DatePicker fx:id="entryDatePicker" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="8" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                            <Label text="Observacoes" styleClass="field-label" />
+                            <TextArea fx:id="notesArea" promptText="Informacoes adicionais do ativo ou lote" prefRowCount="4" styleClass="input-field text-area-field" wrapText="true" />
+                        </VBox>
+                    </GridPane>
+                </VBox>
+
+                <Label fx:id="formStatusLabel" wrapText="true" styleClass="form-status-neutral" />
+
+                <HBox spacing="10.0">
+                    <Button fx:id="saveEquipmentButton" text="Cadastrar equipamento" onAction="#handleCreateEquipment" styleClass="primary-button" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
+                    <Button text="Limpar" onAction="#handleClearForm" styleClass="secondary-button" />
+                </HBox>
+            </VBox>
+        </GridPane>
+    </center>
+</BorderPane>

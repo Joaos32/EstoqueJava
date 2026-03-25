@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.estoqueti.controller.UserController"
+            styleClass="module-root">
+    <center>
+        <GridPane hgap="22.0" vgap="0.0">
+            <columnConstraints>
+                <ColumnConstraints percentWidth="58.0" />
+                <ColumnConstraints percentWidth="42.0" />
+            </columnConstraints>
+
+            <VBox spacing="16.0" styleClass="content-card" GridPane.columnIndex="0">
+                <padding>
+                    <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
+                </padding>
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Usuarios Cadastrados" styleClass="panel-title" />
+                </HBox>
+                <Label fx:id="accessHintLabel" styleClass="field-value" wrapText="true" />
+                <TableView fx:id="userTable" VBox.vgrow="ALWAYS" styleClass="table-card">
+                    <columns>
+                        <TableColumn fx:id="fullNameColumn" text="Nome" prefWidth="220.0" />
+                        <TableColumn fx:id="usernameColumn" text="Login" prefWidth="140.0" />
+                        <TableColumn fx:id="roleColumn" text="Perfil" prefWidth="130.0" />
+                        <TableColumn fx:id="statusColumn" text="Status" prefWidth="100.0" />
+                        <TableColumn fx:id="lastLoginColumn" text="Ultimo acesso" prefWidth="160.0" />
+                    </columns>
+                </TableView>
+            </VBox>
+
+            <VBox spacing="18.0" styleClass="content-card" GridPane.columnIndex="1">
+                <padding>
+                    <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
+                </padding>
+                <Label text="Novo Usuario" styleClass="panel-title" />
+
+                <GridPane hgap="12.0" vgap="14.0">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="100.0" />
+                    </columnConstraints>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="0">
+                        <Label text="Nome completo" styleClass="field-label" />
+                        <TextField fx:id="fullNameField" promptText="Ex.: Mariana Costa" styleClass="input-field" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="1">
+                        <Label text="Login" styleClass="field-label" />
+                        <TextField fx:id="usernameField" promptText="Ex.: mariana.costa" styleClass="input-field" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="2">
+                        <Label text="Perfil de acesso" styleClass="field-label" />
+                        <ComboBox fx:id="roleComboBox" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="3">
+                        <Label text="Senha" styleClass="field-label" />
+                        <PasswordField fx:id="passwordField" promptText="Minimo de 8 caracteres" styleClass="input-field" />
+                    </VBox>
+
+                    <VBox spacing="6.0" GridPane.rowIndex="4">
+                        <Label text="Confirmacao da senha" styleClass="field-label" />
+                        <PasswordField fx:id="confirmPasswordField" promptText="Repita a senha" styleClass="input-field" />
+                    </VBox>
+                </GridPane>
+
+                <CheckBox fx:id="activeCheckBox" text="Usuario ativo" selected="true" />
+                <Label fx:id="formStatusLabel" wrapText="true" styleClass="form-status-neutral" />
+
+                <HBox spacing="10.0">
+                    <Button fx:id="saveUserButton" text="Cadastrar usuario" onAction="#handleCreateUser" styleClass="primary-button" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
+                    <Button text="Limpar" onAction="#handleClearForm" styleClass="secondary-button" />
+                </HBox>
+            </VBox>
+        </GridPane>
+    </center>
+</BorderPane>

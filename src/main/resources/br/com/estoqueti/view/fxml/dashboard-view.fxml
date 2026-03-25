@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.estoqueti.controller.DashboardController"
+            styleClass="module-root">
+    <center>
+        <VBox spacing="18.0">
+            <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="dashboard-header">
+                <VBox spacing="4.0">
+                    <Label fx:id="welcomeLabel" styleClass="panel-title" />
+                    <Label fx:id="dashboardSubtitleLabel" styleClass="field-value" wrapText="true" />
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="Atualizar painel" onAction="#handleRefreshDashboard" styleClass="secondary-button" />
+            </HBox>
+
+            <GridPane hgap="14.0" vgap="14.0">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="20.0" />
+                    <ColumnConstraints percentWidth="20.0" />
+                    <ColumnConstraints percentWidth="20.0" />
+                    <ColumnConstraints percentWidth="20.0" />
+                    <ColumnConstraints percentWidth="20.0" />
+                </columnConstraints>
+
+                <VBox spacing="8.0" styleClass="metric-card" GridPane.columnIndex="0">
+                    <padding>
+                        <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
+                    </padding>
+                    <Label text="Total de Itens Cadastrados" styleClass="metric-label" wrapText="true" />
+                    <Label fx:id="totalItemsValueLabel" styleClass="metric-value" />
+                    <Label fx:id="totalItemsMetaLabel" styleClass="metric-meta" wrapText="true" />
+                </VBox>
+
+                <VBox spacing="8.0" styleClass="metric-card" GridPane.columnIndex="1">
+                    <padding>
+                        <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
+                    </padding>
+                    <Label text="Total Disponivel" styleClass="metric-label" wrapText="true" />
+                    <Label fx:id="availableValueLabel" styleClass="metric-value" />
+                    <Label fx:id="availableMetaLabel" styleClass="metric-meta" wrapText="true" />
+                </VBox>
+
+                <VBox spacing="8.0" styleClass="metric-card" GridPane.columnIndex="2">
+                    <padding>
+                        <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
+                    </padding>
+                    <Label text="Total em Uso" styleClass="metric-label" wrapText="true" />
+                    <Label fx:id="inUseValueLabel" styleClass="metric-value" />
+                    <Label fx:id="inUseMetaLabel" styleClass="metric-meta" wrapText="true" />
+                </VBox>
+
+                <VBox spacing="8.0" styleClass="metric-card" GridPane.columnIndex="3">
+                    <padding>
+                        <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
+                    </padding>
+                    <Label text="Total em Manutencao" styleClass="metric-label" wrapText="true" />
+                    <Label fx:id="maintenanceValueLabel" styleClass="metric-value" />
+                    <Label fx:id="maintenanceMetaLabel" styleClass="metric-meta" wrapText="true" />
+                </VBox>
+
+                <VBox spacing="8.0" styleClass="metric-card warning" GridPane.columnIndex="4">
+                    <padding>
+                        <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
+                    </padding>
+                    <Label text="Itens Abaixo do Estoque Minimo" styleClass="metric-label" wrapText="true" />
+                    <Label fx:id="lowStockValueLabel" styleClass="metric-value" />
+                    <Label fx:id="lowStockMetaLabel" styleClass="metric-meta" wrapText="true" />
+                </VBox>
+            </GridPane>
+
+            <GridPane hgap="18.0" vgap="0.0">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="42.0" />
+                    <ColumnConstraints percentWidth="58.0" />
+                </columnConstraints>
+
+                <VBox spacing="14.0" styleClass="content-card dashboard-panel" GridPane.columnIndex="0">
+                    <padding>
+                        <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
+                    </padding>
+                    <Label text="Itens com Estoque Baixo" styleClass="panel-title" />
+                    <Label text="Registros cujo saldo atual esta abaixo do estoque minimo configurado." styleClass="field-value" wrapText="true" />
+                    <TableView fx:id="lowStockTable" VBox.vgrow="ALWAYS" styleClass="table-card compact-table">
+                        <columns>
+                            <TableColumn fx:id="lowStockCodeColumn" text="Codigo" prefWidth="95.0" />
+                            <TableColumn fx:id="lowStockNameColumn" text="Equipamento" prefWidth="190.0" />
+                            <TableColumn fx:id="lowStockLocationColumn" text="Localizacao" prefWidth="130.0" />
+                            <TableColumn fx:id="lowStockQuantityColumn" text="Atual" prefWidth="60.0" />
+                            <TableColumn fx:id="lowStockMinimumColumn" text="Minimo" prefWidth="70.0" />
+                            <TableColumn fx:id="lowStockGapColumn" text="Deficit" prefWidth="70.0" />
+                        </columns>
+                    </TableView>
+                </VBox>
+
+                <VBox spacing="14.0" styleClass="content-card dashboard-panel" GridPane.columnIndex="1">
+                    <padding>
+                        <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
+                    </padding>
+                    <Label text="Ultimas Movimentacoes" styleClass="panel-title" />
+                    <Label text="Historico recente das operacoes registradas pela equipe no estoque." styleClass="field-value" wrapText="true" />
+                    <TableView fx:id="recentMovementsTable" VBox.vgrow="ALWAYS" styleClass="table-card compact-table">
+                        <columns>
+                            <TableColumn fx:id="recentMovementDateColumn" text="Data/Hora" prefWidth="120.0" />
+                            <TableColumn fx:id="recentMovementTypeColumn" text="Tipo" prefWidth="145.0" />
+                            <TableColumn fx:id="recentMovementEquipmentColumn" text="Equipamento" prefWidth="245.0" />
+                            <TableColumn fx:id="recentMovementQuantityColumn" text="Qtd." prefWidth="60.0" />
+                            <TableColumn fx:id="recentMovementRouteColumn" text="Fluxo" prefWidth="210.0" />
+                            <TableColumn fx:id="recentMovementResponsibleColumn" text="Responsavel" prefWidth="150.0" />
+                        </columns>
+                    </TableView>
+                </VBox>
+            </GridPane>
+
+            <Label fx:id="dashboardStatusLabel" styleClass="form-status-neutral" wrapText="true" />
+        </VBox>
+    </center>
+</BorderPane>

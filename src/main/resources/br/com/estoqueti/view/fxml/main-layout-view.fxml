@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="br.com.estoqueti.controller.MainLayoutController"
+            prefWidth="1360.0"
+            prefHeight="820.0"
+            styleClass="main-root">
+    <left>
+        <VBox spacing="10.0" styleClass="sidebar">
+            <padding>
+                <Insets top="24.0" right="18.0" bottom="24.0" left="18.0" />
+            </padding>
+            <Label text="ESTOQUETI" styleClass="sidebar-brand" />
+            <Label text="Desktop corporativo" styleClass="sidebar-subtitle" />
+            <VBox spacing="8.0">
+                <Button fx:id="dashboardMenuButton" text="Dashboard" onAction="#handleDashboardMenu" styleClass="menu-button" maxWidth="1.7976931348623157E308" />
+                <Button fx:id="equipmentMenuButton" text="Equipamentos" onAction="#handleEquipmentMenu" styleClass="menu-button" maxWidth="1.7976931348623157E308" />
+                <Button fx:id="movementMenuButton" text="Movimentacoes" onAction="#handleMovementMenu" styleClass="menu-button" maxWidth="1.7976931348623157E308" />
+                <Button fx:id="usersMenuButton" text="Usuarios" onAction="#handleUsersMenu" styleClass="menu-button" maxWidth="1.7976931348623157E308" />
+                <Button fx:id="reportsMenuButton" text="Relatorios" onAction="#handleReportsMenu" styleClass="menu-button" maxWidth="1.7976931348623157E308" />
+            </VBox>
+            <Region VBox.vgrow="ALWAYS" />
+            <Button fx:id="logoutButton" text="Sair" onAction="#handleLogout" styleClass="menu-button logout" maxWidth="1.7976931348623157E308" />
+        </VBox>
+    </left>
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="topbar">
+            <padding>
+                <Insets top="18.0" right="28.0" bottom="18.0" left="28.0" />
+            </padding>
+            <Label fx:id="contentTitleLabel" styleClass="page-title" />
+            <Region HBox.hgrow="ALWAYS" />
+            <VBox alignment="CENTER_RIGHT" spacing="2.0">
+                <Label fx:id="currentUserNameLabel" styleClass="session-name" />
+                <Label fx:id="currentUsernameLabel" styleClass="session-username" />
+            </VBox>
+            <Label fx:id="currentUserRoleLabel" styleClass="session-chip" />
+        </HBox>
+    </top>
+    <center>
+        <StackPane fx:id="contentContainer" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets top="0.0" right="28.0" bottom="28.0" left="28.0" />
+            </padding>
+        </StackPane>
+    </center>
+</BorderPane>
