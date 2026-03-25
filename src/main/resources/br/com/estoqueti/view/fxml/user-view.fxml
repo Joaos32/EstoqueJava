@@ -11,6 +11,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Priority?>
@@ -21,20 +22,25 @@
             fx:controller="br.com.estoqueti.controller.UserController"
             styleClass="module-root">
     <center>
-        <GridPane hgap="22.0" vgap="0.0">
+        <GridPane fx:id="userLayoutPane" alignment="TOP_LEFT" hgap="22.0" vgap="22.0" maxWidth="1.7976931348623157E308">
             <columnConstraints>
-                <ColumnConstraints percentWidth="58.0" />
-                <ColumnConstraints percentWidth="42.0" />
+                <ColumnConstraints percentWidth="58.0" hgrow="ALWAYS" fillWidth="true" />
+                <ColumnConstraints percentWidth="42.0" hgrow="ALWAYS" fillWidth="true" />
             </columnConstraints>
 
-            <VBox spacing="16.0" styleClass="content-card" GridPane.columnIndex="0">
+            <VBox fx:id="usersTableCard" spacing="16.0" styleClass="content-card" prefWidth="590.0" minWidth="520.0" maxWidth="1.7976931348623157E308" GridPane.columnIndex="0" GridPane.rowIndex="0">
                 <padding>
                     <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
                 </padding>
-                <HBox alignment="CENTER_LEFT">
+                <VBox spacing="4.0">
+                    <Label text="ACESSOS" styleClass="section-kicker" />
                     <Label text="Usuarios Cadastrados" styleClass="panel-title" />
-                </HBox>
-                <Label fx:id="accessHintLabel" styleClass="field-value" wrapText="true" />
+                    <Label fx:id="accessHintLabel" styleClass="field-value" wrapText="true" />
+                </VBox>
+                <FlowPane alignment="CENTER_LEFT" hgap="10.0" vgap="10.0" styleClass="table-toolbar">
+                    <Label text="Perfis, status e ultimo acesso visiveis em uma unica grade." styleClass="section-caption" wrapText="true" maxWidth="1.7976931348623157E308" />
+                    <Label fx:id="resultsSummaryLabel" styleClass="results-chip" />
+                </FlowPane>
                 <TableView fx:id="userTable" VBox.vgrow="ALWAYS" styleClass="table-card">
                     <columns>
                         <TableColumn fx:id="fullNameColumn" text="Nome" prefWidth="220.0" />
@@ -46,11 +52,16 @@
                 </TableView>
             </VBox>
 
-            <VBox spacing="18.0" styleClass="content-card" GridPane.columnIndex="1">
+            <VBox fx:id="userFormCard" spacing="18.0" styleClass="content-card" prefWidth="410.0" minWidth="380.0" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="0">
                 <padding>
                     <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
                 </padding>
-                <Label text="Novo Usuario" styleClass="panel-title" />
+                <VBox spacing="4.0">
+                    <Label text="NOVO PERFIL" styleClass="section-kicker" />
+                    <Label text="Novo Usuario" styleClass="panel-title" />
+                    <Label text="Defina perfil e status inicial com foco no menor privilegio necessario para a rotina." styleClass="section-caption" wrapText="true" />
+                </VBox>
+                <Label text="Use logins padronizados e senhas fortes para manter a operacao segura e auditavel." styleClass="summary-card muted" wrapText="true" />
 
                 <GridPane hgap="12.0" vgap="14.0">
                     <columnConstraints>
@@ -87,7 +98,7 @@
                 <Label fx:id="formStatusLabel" wrapText="true" styleClass="form-status-neutral" />
 
                 <HBox spacing="10.0">
-                    <Button fx:id="saveUserButton" text="Cadastrar usuario" onAction="#handleCreateUser" styleClass="primary-button" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
+                    <Button fx:id="saveUserButton" text="Cadastrar usuario" onAction="#handleCreateUser" styleClass="primary-button" maxWidth="1.7976931348623157E308" />
                     <Button text="Limpar" onAction="#handleClearForm" styleClass="secondary-button" />
                 </HBox>
             </VBox>

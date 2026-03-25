@@ -18,7 +18,6 @@ import br.com.estoqueti.model.entity.Location;
 import br.com.estoqueti.model.entity.StockMovement;
 import br.com.estoqueti.model.entity.User;
 import br.com.estoqueti.model.enums.AuditAction;
-import br.com.estoqueti.model.enums.EquipmentStatus;
 import br.com.estoqueti.model.enums.MovementType;
 import br.com.estoqueti.repository.AuditLogRepository;
 import br.com.estoqueti.repository.EquipmentRepository;
@@ -31,7 +30,6 @@ import br.com.estoqueti.repository.impl.JpaStockMovementRepository;
 import br.com.estoqueti.util.WorkstationUtils;
 
 import java.util.List;
-import java.util.Objects;
 
 public class StockMovementService {
 
@@ -82,13 +80,13 @@ public class StockMovementService {
 
             Location sourceLocation = resolveLocation(locationRepository, request.sourceLocationId(), "origem");
             Location destinationLocation = resolveLocation(locationRepository, request.destinationLocationId(), "destino");
-            String responsibleName = normalizeRequired(request.responsibleName());
-            String notes = normalizeOptional(request.notes());
+            String responsibleName = InventoryMovementSupport.normalizeRequired(request.responsibleName());
+            String notes = InventoryMovementSupport.normalizeOptional(request.notes());
             int movementQuantity = request.quantity();
 
-            validateMovementRules(equipment, request.movementType(), movementQuantity, sourceLocation, destinationLocation);
+            InventoryMovementSupport.validateMovementRules(equipment, request.movementType(), movementQuantity, sourceLocation, destinationLocation);
 
-            applyMovementToEquipment(equipment, request.movementType(), movementQuantity, destinationLocation, responsibleName);
+            InventoryMovementSupport.applyMovementToEquipment(equipment, request.movementType(), movementQuantity, destinationLocation, responsibleName);
             equipmentRepository.save(equipment);
 
             StockMovement stockMovement = StockMovement.of(
@@ -128,6 +126,9 @@ public class StockMovementService {
         if (request.movementType() == null) {
             throw new ValidationException("Selecione o tipo de movimentacao.");
         }
+        if (request.movementType() == MovementType.ENTREGA_FUNCIONARIO || request.movementType() == MovementType.DEVOLUCAO_FUNCIONARIO) {
+            throw new ValidationException("Use o fluxo de protocolo para registrar esse tipo de movimentacao.");
+        }
         if (request.quantity() == null) {
             throw new ValidationException("Informe a quantidade movimentada.");
         }
@@ -149,99 +150,5 @@ public class StockMovementService {
 
         return locationRepository.findActiveById(locationId)
                 .orElseThrow(() -> new ValidationException("Selecione uma localizacao de " + fieldName + " valida."));
-    }
-
-    private void validateMovementRules(
-            Equipment equipment,
-            MovementType movementType,
-            int movementQuantity,
-            Location sourceLocation,
-            Location destinationLocation
-    ) {
-        if (movementType.requiresSourceLocation() && sourceLocation == null) {
-            throw new ValidationException("Selecione a localizacao de origem da movimentacao.");
-        }
-        if (!movementType.requiresSourceLocation() && sourceLocation != null) {
-            throw new ValidationException("Este tipo de movimentacao nao permite origem informada.");
-        }
-        if (movementType.requiresDestinationLocation() && destinationLocation == null) {
-            throw new ValidationException("Selecione a localizacao de destino da movimentacao.");
-        }
-        if (!movementType.requiresDestinationLocation() && destinationLocation != null) {
-            throw new ValidationException("Este tipo de movimentacao nao permite destino informado.");
-        }
-        if (movementType.requiresDistinctLocations() && sourceLocation != null && destinationLocation != null
-                && Objects.equals(sourceLocation.getId(), destinationLocation.getId())) {
-            throw new ValidationException("Origem e destino devem ser diferentes para essa movimentacao.");
-        }
-        if (sourceLocation != null && !Objects.equals(sourceLocation.getId(), equipment.getLocation().getId())) {
-            throw new ValidationException("A localizacao de origem deve ser igual ao local atual do equipamento.");
-        }
-        if (movementType != MovementType.ENTRADA && equipment.getQuantity() <= 0) {
-            throw new ValidationException("O equipamento nao possui saldo disponivel para essa movimentacao.");
-        }
-        if (movementType != MovementType.ENTRADA && movementQuantity > equipment.getQuantity()) {
-            throw new ValidationException("A quantidade movimentada nao pode ser maior que o saldo atual do equipamento.");
-        }
-        if (movementType == MovementType.RETORNO_MANUTENCAO && equipment.getStatus() != EquipmentStatus.EM_MANUTENCAO) {
-            throw new ValidationException("Somente equipamentos em manutencao podem registrar retorno de manutencao.");
-        }
-        if (movementType != MovementType.ENTRADA && equipment.getStatus() == EquipmentStatus.DESCARTADO) {
-            throw new ValidationException("Equipamentos descartados nao podem receber novas movimentacoes.");
-        }
-        if (movementType == MovementType.ENTRADA && equipment.getQuantity() > 0 && destinationLocation != null
-                && !Objects.equals(destinationLocation.getId(), equipment.getLocation().getId())) {
-            throw new ValidationException("Entradas adicionais devem usar a mesma localizacao atual do registro, a menos que o saldo esteja zerado.");
-        }
-        if ((movementType == MovementType.TRANSFERENCIA
-                || movementType == MovementType.ENVIO_MANUTENCAO
-                || movementType == MovementType.RETORNO_MANUTENCAO)
-                && movementQuantity != equipment.getQuantity()) {
-            throw new ValidationException("Esse tipo de movimentacao exige a transferencia do saldo total do registro para manter a consistencia do estoque.");
-        }
-    }
-
-    private void applyMovementToEquipment(
-            Equipment equipment,
-            MovementType movementType,
-            int movementQuantity,
-            Location destinationLocation,
-            String responsibleName
-    ) {
-        if (movementType == MovementType.ENTRADA) {
-            equipment.addQuantity(movementQuantity);
-        }
-        if (movementType.decreasesQuantity()) {
-            equipment.removeQuantity(movementQuantity);
-        }
-        if (destinationLocation != null) {
-            equipment.changeLocation(destinationLocation);
-        }
-
-        int resultingQuantity = equipment.getQuantity();
-        equipment.changeStatus(resolveStatusAfterMovement(equipment.getStatus(), movementType, resultingQuantity));
-        equipment.changeResponsibleName(responsibleName);
-    }
-
-    private EquipmentStatus resolveStatusAfterMovement(EquipmentStatus currentStatus, MovementType movementType, int resultingQuantity) {
-        return switch (movementType) {
-            case ENTRADA -> EquipmentStatus.DISPONIVEL;
-            case SAIDA, TRANSFERENCIA -> currentStatus;
-            case ENVIO_MANUTENCAO -> EquipmentStatus.EM_MANUTENCAO;
-            case RETORNO_MANUTENCAO -> EquipmentStatus.DISPONIVEL;
-            case BAIXA_DESCARTE -> resultingQuantity == 0 ? EquipmentStatus.DESCARTADO : currentStatus;
-        };
-    }
-
-    private String normalizeRequired(String value) {
-        return value == null ? null : value.trim();
-    }
-
-    private String normalizeOptional(String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
     }
 }

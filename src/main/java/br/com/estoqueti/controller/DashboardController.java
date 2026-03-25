@@ -6,6 +6,8 @@ import br.com.estoqueti.dto.dashboard.DashboardSummaryDto;
 import br.com.estoqueti.dto.movement.StockMovementListItemDto;
 import br.com.estoqueti.service.DashboardService;
 import br.com.estoqueti.session.UserSession;
+import br.com.estoqueti.util.ResponsiveLayoutSupport;
+import br.com.estoqueti.util.UiSupport;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -13,11 +15,14 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
 
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.function.BiConsumer;
 
 public class DashboardController {
 
@@ -25,6 +30,32 @@ public class DashboardController {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final DashboardService dashboardService = new DashboardService();
+    @FXML
+    private FlowPane metricsFlowPane;
+
+    @FXML
+    private VBox totalMetricCard;
+
+    @FXML
+    private VBox availableMetricCard;
+
+    @FXML
+    private VBox inUseMetricCard;
+
+    @FXML
+    private VBox maintenanceMetricCard;
+
+    @FXML
+    private VBox lowStockMetricCard;
+
+    @FXML
+    private FlowPane dashboardPanelsFlowPane;
+
+    @FXML
+    private VBox lowStockPanelCard;
+
+    @FXML
+    private VBox recentMovementsPanelCard;
 
     @FXML
     private Label welcomeLabel;
@@ -109,6 +140,8 @@ public class DashboardController {
 
     @FXML
     public void initialize() {
+        ResponsiveLayoutSupport.configureResponsiveTiles(metricsFlowPane, 192, 360, totalMetricCard, availableMetricCard, inUseMetricCard, maintenanceMetricCard, lowStockMetricCard);
+        ResponsiveLayoutSupport.configureResponsiveSplit(dashboardPanelsFlowPane, lowStockPanelCard, 42, 400, recentMovementsPanelCard, 58, 460);
         configureTables();
         configureStaticTexts();
         loadDashboard();
@@ -129,23 +162,42 @@ public class DashboardController {
 
         recentMovementDateColumn.setCellValueFactory(data -> new SimpleStringProperty(DATE_TIME_FORMATTER.format(data.getValue().movementAt().toLocalDateTime())));
         recentMovementTypeColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().movementType().getDisplayName()));
+        recentMovementTypeColumn.setCellFactory(UiSupport.badgeCellFactory(this::resolveMovementBadgeStyle));
         recentMovementEquipmentColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().equipmentInternalCode() + " - " + data.getValue().equipmentName()));
         recentMovementQuantityColumn.setCellValueFactory(data -> new SimpleStringProperty(formatInteger(data.getValue().quantity())));
         recentMovementRouteColumn.setCellValueFactory(data -> new SimpleStringProperty(buildRouteLabel(data.getValue())));
         recentMovementResponsibleColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().responsibleName()));
 
-        configureInformationalTable(lowStockTable);
-        configureInformationalTable(recentMovementsTable);
+        lowStockTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        recentMovementsTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        configureInformationalTable(lowStockTable, this::applyLowStockRowStyle);
+        configureInformationalTable(recentMovementsTable, this::applyRecentMovementRowStyle);
 
-        lowStockTable.setPlaceholder(new Label("Nenhum item abaixo do estoque minimo no momento."));
-        recentMovementsTable.setPlaceholder(new Label("Nenhuma movimentacao recente encontrada."));
+        lowStockTable.setPlaceholder(UiSupport.createTablePlaceholder(
+                "Sem alertas criticos no momento",
+                "Quando houver itens abaixo do minimo configurado, eles aparecerao aqui."
+        ));
+        recentMovementsTable.setPlaceholder(UiSupport.createTablePlaceholder(
+                "Sem movimentacoes recentes",
+                "O historico operacional mais recente sera exibido neste painel assim que houver registros."
+        ));
     }
 
-    private <T> void configureInformationalTable(TableView<T> tableView) {
+    private <T> void configureInformationalTable(TableView<T> tableView, BiConsumer<TableRow<T>, T> rowStyler) {
         tableView.setEditable(false);
         tableView.setFocusTraversable(false);
         tableView.setRowFactory(ignored -> {
-            TableRow<T> row = new TableRow<>();
+            TableRow<T> row = new TableRow<>() {
+                @Override
+                protected void updateItem(T item, boolean empty) {
+                    super.updateItem(item, empty);
+                    getStyleClass().removeAll("table-row-warning", "table-row-danger", "table-row-info", "table-row-muted");
+
+                    if (!empty && item != null) {
+                        rowStyler.accept(this, item);
+                    }
+                }
+            };
             row.setOnMousePressed(event -> {
                 if (!row.isEmpty()) {
                     tableView.getSelectionModel().clearSelection();
@@ -204,6 +256,25 @@ public class DashboardController {
         recentMovementsTable.setItems(FXCollections.observableArrayList(summary.recentMovements()));
     }
 
+    private void applyLowStockRowStyle(TableRow<DashboardLowStockItemDto> row, DashboardLowStockItemDto item) {
+        if (item.quantity() == 0) {
+            row.getStyleClass().add("table-row-danger");
+        } else {
+            row.getStyleClass().add("table-row-warning");
+        }
+    }
+
+    private void applyRecentMovementRowStyle(TableRow<StockMovementListItemDto> row, StockMovementListItemDto item) {
+        switch (item.movementType()) {
+            case BAIXA_DESCARTE -> row.getStyleClass().add("table-row-danger");
+            case ENVIO_MANUTENCAO, RETORNO_MANUTENCAO -> row.getStyleClass().add("table-row-warning");
+            case TRANSFERENCIA, ENTREGA_FUNCIONARIO, DEVOLUCAO_FUNCIONARIO -> row.getStyleClass().add("table-row-info");
+            case SAIDA -> row.getStyleClass().add("table-row-muted");
+            default -> {
+            }
+        }
+    }
+
     private String buildRouteLabel(StockMovementListItemDto item) {
         String source = item.sourceLocationName() == null ? "Sem origem" : item.sourceLocationName();
         String destination = item.destinationLocationName() == null ? "Sem destino" : item.destinationLocationName();
@@ -214,8 +285,19 @@ public class DashboardController {
         return INTEGER_FORMAT.format(value);
     }
 
+    private String resolveMovementBadgeStyle(String movementType) {
+        return switch (movementType) {
+            case "Entrada de estoque", "Retorno de manutencao", "Devolucao com protocolo" -> "badge-success";
+            case "Transferencia entre locais", "Entrega com protocolo" -> "badge-info";
+            case "Envio para manutencao" -> "badge-warning";
+            case "Saida de estoque", "Baixa ou descarte" -> "badge-danger";
+            default -> "badge-neutral";
+        };
+    }
+
     private void applyStatusStyle(String styleClass) {
         dashboardStatusLabel.getStyleClass().removeAll("form-status-neutral", "form-status-error", "form-status-success");
         dashboardStatusLabel.getStyleClass().add(styleClass);
     }
 }
+

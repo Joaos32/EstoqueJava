@@ -6,8 +6,7 @@
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.Region?>
@@ -21,13 +20,8 @@
             prefHeight="720.0"
             styleClass="login-root">
     <center>
-        <GridPane hgap="0.0" BorderPane.alignment="CENTER">
-            <columnConstraints>
-                <ColumnConstraints percentWidth="53.0" />
-                <ColumnConstraints percentWidth="47.0" />
-            </columnConstraints>
-
-            <StackPane GridPane.columnIndex="0" styleClass="login-brand-panel">
+        <FlowPane alignment="CENTER" hgap="28.0" vgap="28.0" prefWrapLength="980.0" BorderPane.alignment="CENTER">
+            <StackPane styleClass="login-brand-panel" prefWidth="520.0" minWidth="420.0">
                 <VBox spacing="22.0" styleClass="login-brand-card">
                     <Label text="ESTOQUETI DESKTOP" styleClass="eyebrow-label" />
                     <Label text="Controle corporativo de estoque de TI com autenticacao, perfis de acesso e base pronta para crescer." styleClass="login-hero-title" wrapText="true" />
@@ -42,7 +36,7 @@
                 </VBox>
             </StackPane>
 
-            <StackPane GridPane.columnIndex="1">
+            <StackPane prefWidth="430.0" minWidth="360.0">
                 <VBox spacing="18.0" styleClass="login-form-card">
                     <Label text="Acesso ao Sistema" styleClass="panel-title" />
                     <Label text="Entre com suas credenciais para acessar os modulos corporativos." styleClass="field-value" wrapText="true" />
@@ -68,6 +62,6 @@
                     </HBox>
                 </VBox>
             </StackPane>
-        </GridPane>
+        </FlowPane>
     </center>
 </BorderPane>

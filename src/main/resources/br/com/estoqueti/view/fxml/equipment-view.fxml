@@ -11,9 +11,11 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
@@ -21,18 +23,22 @@
             fx:controller="br.com.estoqueti.controller.EquipmentController"
             styleClass="module-root">
     <center>
-        <GridPane hgap="22.0" vgap="0.0">
+        <GridPane fx:id="equipmentLayoutPane" alignment="TOP_LEFT" hgap="22.0" vgap="22.0" maxWidth="1.7976931348623157E308">
             <columnConstraints>
-                <ColumnConstraints percentWidth="61.0" />
-                <ColumnConstraints percentWidth="39.0" />
+                <ColumnConstraints percentWidth="61.0" hgrow="ALWAYS" fillWidth="true" />
+                <ColumnConstraints percentWidth="39.0" hgrow="ALWAYS" fillWidth="true" />
             </columnConstraints>
 
-            <VBox spacing="16.0" styleClass="content-card" GridPane.columnIndex="0">
+            <VBox fx:id="catalogCard" spacing="16.0" styleClass="content-card" prefWidth="610.0" minWidth="540.0" maxWidth="1.7976931348623157E308" GridPane.columnIndex="0" GridPane.rowIndex="0">
                 <padding>
                     <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
                 </padding>
-                <Label text="Consulta de Equipamentos" styleClass="panel-title" />
-                <Label fx:id="accessHintLabel" styleClass="field-value" wrapText="true" />
+                <VBox spacing="4.0">
+                    <Label text="CATALOGO" styleClass="section-kicker" />
+                    <Label text="Consulta de Equipamentos" styleClass="panel-title" />
+                    <Label fx:id="accessHintLabel" styleClass="field-value" wrapText="true" />
+                </VBox>
+                <Label text="Combine filtros para localizar ativos rapidamente por codigo, categoria, local ou responsavel." styleClass="section-caption" wrapText="true" />
 
                 <GridPane hgap="12.0" vgap="14.0" styleClass="form-grid">
                     <columnConstraints>
@@ -81,11 +87,12 @@
                     </VBox>
                 </GridPane>
 
-                <HBox spacing="10.0">
+                <FlowPane alignment="CENTER_LEFT" hgap="10.0" vgap="10.0" styleClass="table-toolbar">
                     <Button text="Aplicar filtros" onAction="#handleSearch" styleClass="primary-button" />
                     <Button text="Limpar filtros" onAction="#handleClearFilters" styleClass="secondary-button" />
-                    <Label fx:id="resultsSummaryLabel" styleClass="helper-label" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
-                </HBox>
+
+                    <Label fx:id="resultsSummaryLabel" styleClass="results-chip" />
+                </FlowPane>
 
                 <TableView fx:id="equipmentTable" VBox.vgrow="ALWAYS" styleClass="table-card">
                     <columns>
@@ -102,11 +109,16 @@
                 </TableView>
             </VBox>
 
-            <VBox spacing="18.0" styleClass="content-card" GridPane.columnIndex="1">
+            <VBox fx:id="formCard" spacing="18.0" styleClass="content-card" prefWidth="390.0" minWidth="370.0" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="0">
                 <padding>
                     <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
                 </padding>
-                <Label text="Novo Equipamento" styleClass="panel-title" />
+                <VBox spacing="4.0">
+                    <Label text="CADASTRO" styleClass="section-kicker" />
+                    <Label text="Novo Equipamento" styleClass="panel-title" />
+                    <Label text="Padronize os dados de entrada para manter alertas, relatorios e rastreabilidade do estoque mais confiaveis." styleClass="section-caption" wrapText="true" />
+                </VBox>
+                <Label text="O estoque minimo alimenta os alertas do dashboard e ajuda a antecipar reposicoes." styleClass="summary-card muted" wrapText="true" />
 
                 <VBox fx:id="formFieldsContainer" spacing="16.0">
                     <GridPane hgap="12.0" vgap="14.0" styleClass="form-grid">

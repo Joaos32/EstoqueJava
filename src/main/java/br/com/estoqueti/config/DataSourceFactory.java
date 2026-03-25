@@ -64,6 +64,8 @@ public final class DataSourceFactory {
         }
 
         LOGGER.info("Inicializando DataSource para {}", properties.displayUrl());
-        return new HikariDataSource(config);
+        HikariDataSource hikariDataSource = new HikariDataSource(config);
+        DatabaseMigrationService.ensureProtocolSupport(hikariDataSource, properties.schema());
+        return hikariDataSource;
     }
 }

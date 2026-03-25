@@ -11,6 +11,8 @@ import br.com.estoqueti.exception.ValidationException;
 import br.com.estoqueti.model.enums.EquipmentStatus;
 import br.com.estoqueti.service.EquipmentService;
 import br.com.estoqueti.session.UserSession;
+import br.com.estoqueti.util.ResponsiveLayoutSupport;
+import br.com.estoqueti.util.UiSupport;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -19,10 +21,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
 import java.time.LocalDate;
@@ -35,6 +39,14 @@ public class EquipmentController {
     private static final DateTimeFormatter ENTRY_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final EquipmentService equipmentService = new EquipmentService();
+    @FXML
+    private GridPane equipmentLayoutPane;
+
+    @FXML
+    private VBox catalogCard;
+
+    @FXML
+    private VBox formCard;
 
     @FXML
     private TableView<EquipmentListItemDto> equipmentTable;
@@ -161,6 +173,7 @@ public class EquipmentController {
         entryDatePicker.setValue(LocalDate.now());
         formStatusLabel.setText("Cadastre ativos e perifericos com dados completos para manter o estoque consistente.");
         applyStatusStyle("form-status-neutral");
+        ResponsiveLayoutSupport.configureResponsiveSplit(equipmentLayoutPane, catalogCard, 61, 540, formCard, 39, 370, 1200);
         loadReferenceData();
         configurePermissions();
         loadEquipment();
@@ -210,11 +223,37 @@ public class EquipmentController {
         nameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().name()));
         categoryColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().categoryName()));
         statusColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().status().getDisplayName()));
+        statusColumn.setCellFactory(UiSupport.badgeCellFactory(this::resolveEquipmentStatusStyle));
         quantityColumn.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().quantity())));
         minimumStockColumn.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().minimumStock())));
         locationColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().locationName()));
         responsibleColumn.setCellValueFactory(data -> new SimpleStringProperty(defaultValue(data.getValue().responsibleName())));
         entryDateColumn.setCellValueFactory(data -> new SimpleStringProperty(ENTRY_DATE_FORMATTER.format(data.getValue().entryDate())));
+        equipmentTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        equipmentTable.setPlaceholder(UiSupport.createTablePlaceholder(
+                "Nenhum equipamento encontrado",
+                "Ajuste os filtros ou cadastre um novo ativo para preencher esta lista."
+        ));
+        equipmentTable.setRowFactory(ignored -> new TableRow<>() {
+            @Override
+            protected void updateItem(EquipmentListItemDto item, boolean empty) {
+                super.updateItem(item, empty);
+                getStyleClass().removeAll("table-row-warning", "table-row-danger", "table-row-muted");
+
+                if (empty || item == null) {
+                    return;
+                }
+
+                if (item.status() == EquipmentStatus.DESCARTADO || item.status() == EquipmentStatus.DEFEITUOSO) {
+                    getStyleClass().add("table-row-danger");
+                } else if (item.minimumStock() > 0 && item.quantity() < item.minimumStock()) {
+                    getStyleClass().add("table-row-warning");
+                } else if (item.status() == EquipmentStatus.EM_MANUTENCAO) {
+                    getStyleClass().add("table-row-muted");
+                }
+            }
+        });
     }
 
     private void configurePermissions() {
@@ -250,7 +289,7 @@ public class EquipmentController {
     private void loadEquipment() {
         List<EquipmentListItemDto> equipments = equipmentService.searchEquipment(buildSearchFilter());
         equipmentTable.setItems(FXCollections.observableArrayList(equipments));
-        resultsSummaryLabel.setText(equipments.size() + " registro(s) encontrados para os filtros informados.");
+        updateResultsSummary(equipments.size());
     }
 
     private EquipmentSearchFilter buildSearchFilter() {
@@ -323,6 +362,28 @@ public class EquipmentController {
     private void applyStatusStyle(String styleClass) {
         formStatusLabel.getStyleClass().removeAll("form-status-neutral", "form-status-error", "form-status-success");
         formStatusLabel.getStyleClass().add(styleClass);
+    }
+
+    private void updateResultsSummary(int resultCount) {
+        if (resultCount == 0) {
+            resultsSummaryLabel.setText("Sem resultados com os filtros atuais");
+            return;
+        }
+
+        resultsSummaryLabel.setText(resultCount == 1
+                ? "1 equipamento em destaque"
+                : resultCount + " equipamentos em destaque");
+    }
+
+    private String resolveEquipmentStatusStyle(String status) {
+        return switch (status) {
+            case "Disponivel" -> "badge-success";
+            case "Em uso" -> "badge-info";
+            case "Em manutencao" -> "badge-warning";
+            case "Defeituoso" -> "badge-danger";
+            case "Descartado" -> "badge-muted";
+            default -> "badge-neutral";
+        };
     }
 
     private String defaultValue(String value) {

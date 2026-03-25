@@ -6,24 +6,34 @@ import br.com.estoqueti.exception.BusinessException;
 import br.com.estoqueti.model.enums.ReportFormat;
 import br.com.estoqueti.model.enums.ReportType;
 import br.com.estoqueti.service.report.ReportService;
+import br.com.estoqueti.util.ResponsiveLayoutSupport;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.Objects;
 
 public class ReportController {
 
     private final ReportService reportService = new ReportService();
 
     private ReportDocumentDto currentDocument;
+    @FXML
+    private GridPane reportLayoutPane;
+
+    @FXML
+    private VBox reportFiltersCard;
+
+    @FXML
+    private VBox reportPreviewCard;
 
     @FXML
     private ComboBox<ReportType> reportTypeComboBox;
@@ -60,6 +70,7 @@ public class ReportController {
 
     @FXML
     public void initialize() {
+        ResponsiveLayoutSupport.configureResponsiveSplit(reportLayoutPane, reportFiltersCard, 46, 420, reportPreviewCard, 54, 440, 1080);
         reportTypeComboBox.setItems(FXCollections.observableArrayList(ReportType.values()));
         reportTypeComboBox.getSelectionModel().select(ReportType.EQUIPAMENTOS_CADASTRADOS);
         reportTypeComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -67,6 +78,8 @@ public class ReportController {
             configureDateFields();
             refreshPreview();
         });
+        startDatePicker.valueProperty().addListener((observable, oldValue, newValue) -> handleFilterChange());
+        endDatePicker.valueProperty().addListener((observable, oldValue, newValue) -> handleFilterChange());
         startDatePicker.setValue(LocalDate.now().minusDays(30));
         endDatePicker.setValue(LocalDate.now());
         configureDateFields();
@@ -86,6 +99,11 @@ public class ReportController {
     @FXML
     private void handleExportPdf() {
         exportReport(ReportFormat.PDF);
+    }
+
+    private void handleFilterChange() {
+        currentDocument = null;
+        refreshPreview();
     }
 
     private void configureDateFields() {
@@ -110,6 +128,7 @@ public class ReportController {
             previewColumnsLabel.setText(String.join(" | ", document.headers()));
             reportStatusLabel.setText("Resumo carregado com sucesso. Selecione CSV ou PDF para exportar.");
             applyStatusStyle("form-status-neutral");
+            updateExportButtons(true);
         } catch (BusinessException exception) {
             currentDocument = null;
             previewTitleLabel.setText("Resumo indisponivel");
@@ -117,6 +136,7 @@ public class ReportController {
             previewColumnsLabel.setText("Ajuste os filtros do relatorio e tente novamente.");
             reportStatusLabel.setText(exception.getMessage());
             applyStatusStyle("form-status-error");
+            updateExportButtons(false);
         }
     }
 
@@ -147,12 +167,14 @@ public class ReportController {
         ReportRequestDto request = buildRequest();
         if (currentDocument == null || currentDocument.reportType() != request.reportType()) {
             currentDocument = reportService.generateReport(request);
+            updateExportButtons(true);
             return currentDocument;
         }
 
         if (request.reportType().requiresPeriod()) {
             currentDocument = reportService.generateReport(request);
         }
+        updateExportButtons(true);
         return currentDocument;
     }
 
@@ -172,6 +194,11 @@ public class ReportController {
                 new FileChooser.ExtensionFilter(reportFormat.getDisplayName() + " (*." + reportFormat.getExtension() + ")", "*." + reportFormat.getExtension())
         );
         return fileChooser.showSaveDialog(exportCsvButton.getScene().getWindow());
+    }
+
+    private void updateExportButtons(boolean enabled) {
+        exportCsvButton.setDisable(!enabled);
+        exportPdfButton.setDisable(!enabled);
     }
 
     private void applyStatusStyle(String styleClass) {

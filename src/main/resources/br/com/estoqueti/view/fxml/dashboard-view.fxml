@@ -7,6 +7,7 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Priority?>
@@ -18,9 +19,10 @@
             fx:controller="br.com.estoqueti.controller.DashboardController"
             styleClass="module-root">
     <center>
-        <VBox spacing="18.0">
+        <VBox spacing="18.0" maxWidth="1.7976931348623157E308">
             <HBox alignment="CENTER_LEFT" spacing="16.0" styleClass="dashboard-header">
                 <VBox spacing="4.0">
+                    <Label text="VISAO GERAL" styleClass="section-kicker" />
                     <Label fx:id="welcomeLabel" styleClass="panel-title" />
                     <Label fx:id="dashboardSubtitleLabel" styleClass="field-value" wrapText="true" />
                 </VBox>
@@ -28,16 +30,9 @@
                 <Button text="Atualizar painel" onAction="#handleRefreshDashboard" styleClass="secondary-button" />
             </HBox>
 
-            <GridPane hgap="14.0" vgap="14.0">
-                <columnConstraints>
-                    <ColumnConstraints percentWidth="20.0" />
-                    <ColumnConstraints percentWidth="20.0" />
-                    <ColumnConstraints percentWidth="20.0" />
-                    <ColumnConstraints percentWidth="20.0" />
-                    <ColumnConstraints percentWidth="20.0" />
-                </columnConstraints>
+            <FlowPane fx:id="metricsFlowPane" alignment="TOP_LEFT" hgap="14.0" vgap="14.0" prefWrapLength="1040.0" maxWidth="1.7976931348623157E308">
 
-                <VBox spacing="8.0" styleClass="metric-card" GridPane.columnIndex="0">
+                <VBox fx:id="totalMetricCard" id="metric-total-card" spacing="8.0" styleClass="metric-card" prefWidth="192.0" minWidth="192.0" maxWidth="1.7976931348623157E308">
                     <padding>
                         <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
                     </padding>
@@ -46,7 +41,7 @@
                     <Label fx:id="totalItemsMetaLabel" styleClass="metric-meta" wrapText="true" />
                 </VBox>
 
-                <VBox spacing="8.0" styleClass="metric-card" GridPane.columnIndex="1">
+                <VBox fx:id="availableMetricCard" id="metric-available-card" spacing="8.0" styleClass="metric-card" prefWidth="192.0" minWidth="192.0" maxWidth="1.7976931348623157E308">
                     <padding>
                         <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
                     </padding>
@@ -55,7 +50,7 @@
                     <Label fx:id="availableMetaLabel" styleClass="metric-meta" wrapText="true" />
                 </VBox>
 
-                <VBox spacing="8.0" styleClass="metric-card" GridPane.columnIndex="2">
+                <VBox fx:id="inUseMetricCard" id="metric-in-use-card" spacing="8.0" styleClass="metric-card" prefWidth="192.0" minWidth="192.0" maxWidth="1.7976931348623157E308">
                     <padding>
                         <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
                     </padding>
@@ -64,7 +59,7 @@
                     <Label fx:id="inUseMetaLabel" styleClass="metric-meta" wrapText="true" />
                 </VBox>
 
-                <VBox spacing="8.0" styleClass="metric-card" GridPane.columnIndex="3">
+                <VBox fx:id="maintenanceMetricCard" id="metric-maintenance-card" spacing="8.0" styleClass="metric-card" prefWidth="192.0" minWidth="192.0" maxWidth="1.7976931348623157E308">
                     <padding>
                         <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
                     </padding>
@@ -73,7 +68,7 @@
                     <Label fx:id="maintenanceMetaLabel" styleClass="metric-meta" wrapText="true" />
                 </VBox>
 
-                <VBox spacing="8.0" styleClass="metric-card warning" GridPane.columnIndex="4">
+                <VBox fx:id="lowStockMetricCard" id="metric-low-stock-card" spacing="8.0" styleClass="metric-card" prefWidth="192.0" minWidth="192.0" maxWidth="1.7976931348623157E308">
                     <padding>
                         <Insets top="18.0" right="18.0" bottom="18.0" left="18.0" />
                     </padding>
@@ -81,18 +76,15 @@
                     <Label fx:id="lowStockValueLabel" styleClass="metric-value" />
                     <Label fx:id="lowStockMetaLabel" styleClass="metric-meta" wrapText="true" />
                 </VBox>
-            </GridPane>
+            </FlowPane>
 
-            <GridPane hgap="18.0" vgap="0.0">
-                <columnConstraints>
-                    <ColumnConstraints percentWidth="42.0" />
-                    <ColumnConstraints percentWidth="58.0" />
-                </columnConstraints>
+            <FlowPane fx:id="dashboardPanelsFlowPane" alignment="TOP_LEFT" hgap="18.0" vgap="18.0" prefWrapLength="1040.0" maxWidth="1.7976931348623157E308">
 
-                <VBox spacing="14.0" styleClass="content-card dashboard-panel" GridPane.columnIndex="0">
+                <VBox fx:id="lowStockPanelCard" spacing="14.0" styleClass="content-card dashboard-panel" prefWidth="430.0" minWidth="400.0" maxWidth="1.7976931348623157E308">
                     <padding>
                         <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
                     </padding>
+                    <Label text="ALERTAS" styleClass="section-kicker" />
                     <Label text="Itens com Estoque Baixo" styleClass="panel-title" />
                     <Label text="Registros cujo saldo atual esta abaixo do estoque minimo configurado." styleClass="field-value" wrapText="true" />
                     <TableView fx:id="lowStockTable" VBox.vgrow="ALWAYS" styleClass="table-card compact-table">
@@ -107,10 +99,11 @@
                     </TableView>
                 </VBox>
 
-                <VBox spacing="14.0" styleClass="content-card dashboard-panel" GridPane.columnIndex="1">
+                <VBox fx:id="recentMovementsPanelCard" spacing="14.0" styleClass="content-card dashboard-panel" prefWidth="560.0" minWidth="460.0" maxWidth="1.7976931348623157E308">
                     <padding>
                         <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
                     </padding>
+                    <Label text="ULTIMOS EVENTOS" styleClass="section-kicker" />
                     <Label text="Ultimas Movimentacoes" styleClass="panel-title" />
                     <Label text="Historico recente das operacoes registradas pela equipe no estoque." styleClass="field-value" wrapText="true" />
                     <TableView fx:id="recentMovementsTable" VBox.vgrow="ALWAYS" styleClass="table-card compact-table">
@@ -124,7 +117,7 @@
                         </columns>
                     </TableView>
                 </VBox>
-            </GridPane>
+            </FlowPane>
 
             <Label fx:id="dashboardStatusLabel" styleClass="form-status-neutral" wrapText="true" />
         </VBox>

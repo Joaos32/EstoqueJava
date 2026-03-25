@@ -16,17 +16,18 @@ if ($null -eq $jpackageCommand) {
 
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $inputDir = Join-Path $projectRoot "target\jpackage\input"
-$distDir = Join-Path $projectRoot "target\dist"
+$outputRoot = Join-Path $projectRoot "app"
+$appImageName = "EstoqueTI Desktop"
 $mainJar = Join-Path $projectRoot "target\estoqueti-desktop-1.0.0-SNAPSHOT.jar"
 
 if (Test-Path $inputDir) {
     Remove-Item $inputDir -Recurse -Force
 }
-if (Test-Path $distDir) {
-    Remove-Item $distDir -Recurse -Force
+if (Test-Path $outputRoot) {
+    Remove-Item $outputRoot -Recurse -Force
 }
 New-Item -ItemType Directory -Path $inputDir -Force | Out-Null
-New-Item -ItemType Directory -Path $distDir -Force | Out-Null
+New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 
 Push-Location $projectRoot
 try {
@@ -39,9 +40,9 @@ try {
 
     & $jpackageCommand.Source `
         --type app-image `
-        --dest $distDir `
+        --dest $outputRoot `
         --input $inputDir `
-        --name "EstoqueTI Desktop" `
+        --name $appImageName `
         --main-jar "estoqueti-desktop-1.0.0-SNAPSHOT.jar" `
         --main-class "br.com.estoqueti.AppLauncher" `
         --app-version $AppVersion `
@@ -56,7 +57,7 @@ try {
     Pop-Location
 }
 
-$launcherPath = Join-Path $distDir "EstoqueTI Desktop\EstoqueTI Desktop.exe"
+$launcherPath = Join-Path $outputRoot "$appImageName\$appImageName.exe"
 if (-not (Test-Path $launcherPath)) {
     throw "Executavel nao encontrado em $launcherPath"
 }

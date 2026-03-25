@@ -11,9 +11,9 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
@@ -21,18 +21,22 @@
             fx:controller="br.com.estoqueti.controller.MovementController"
             styleClass="module-root">
     <center>
-        <GridPane hgap="22.0" vgap="0.0">
+        <GridPane fx:id="movementLayoutPane" alignment="TOP_LEFT" hgap="22.0" vgap="22.0" maxWidth="1.7976931348623157E308">
             <columnConstraints>
-                <ColumnConstraints percentWidth="60.0" />
-                <ColumnConstraints percentWidth="40.0" />
+                <ColumnConstraints percentWidth="60.0" hgrow="ALWAYS" fillWidth="true" />
+                <ColumnConstraints percentWidth="40.0" hgrow="ALWAYS" fillWidth="true" />
             </columnConstraints>
 
-            <VBox spacing="16.0" styleClass="content-card" GridPane.columnIndex="0">
+            <VBox fx:id="movementHistoryCard" spacing="16.0" styleClass="content-card" prefWidth="610.0" minWidth="540.0" maxWidth="1.7976931348623157E308" GridPane.columnIndex="0" GridPane.rowIndex="0">
                 <padding>
                     <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
                 </padding>
-                <Label text="Historico de Movimentacoes" styleClass="panel-title" />
-                <Label fx:id="accessHintLabel" styleClass="field-value" wrapText="true" />
+                <VBox spacing="4.0">
+                    <Label text="TRILHA DE ESTOQUE" styleClass="section-kicker" />
+                    <Label text="Historico de Movimentacoes" styleClass="panel-title" />
+                    <Label fx:id="accessHintLabel" styleClass="field-value" wrapText="true" />
+                </VBox>
+                <Label text="Monitore entradas, saidas, entregas com protocolo, devolucoes com protocolo e transferencias com filtros de periodo e contexto operacional." styleClass="section-caption" wrapText="true" />
 
                 <GridPane hgap="12.0" vgap="14.0" styleClass="form-grid">
                     <columnConstraints>
@@ -61,16 +65,16 @@
                     </VBox>
                 </GridPane>
 
-                <HBox spacing="10.0">
+                <FlowPane alignment="CENTER_LEFT" hgap="10.0" vgap="10.0" styleClass="table-toolbar">
                     <Button text="Aplicar filtros" onAction="#handleSearch" styleClass="primary-button" />
                     <Button text="Limpar filtros" onAction="#handleClearFilters" styleClass="secondary-button" />
-                    <Label fx:id="resultsSummaryLabel" styleClass="helper-label" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
-                </HBox>
+                    <Label fx:id="resultsSummaryLabel" styleClass="results-chip" />
+                </FlowPane>
 
                 <TableView fx:id="movementTable" VBox.vgrow="ALWAYS" styleClass="table-card">
                     <columns>
                         <TableColumn fx:id="movementAtColumn" text="Data/Hora" prefWidth="135.0" />
-                        <TableColumn fx:id="movementTypeColumn" text="Tipo" prefWidth="150.0" />
+                        <TableColumn fx:id="movementTypeColumn" text="Tipo" prefWidth="160.0" />
                         <TableColumn fx:id="equipmentColumn" text="Equipamento" prefWidth="250.0" />
                         <TableColumn fx:id="quantityColumn" text="Qtd." prefWidth="65.0" />
                         <TableColumn fx:id="sourceColumn" text="Origem" prefWidth="130.0" />
@@ -81,11 +85,15 @@
                 </TableView>
             </VBox>
 
-            <VBox spacing="18.0" styleClass="content-card" GridPane.columnIndex="1">
+            <VBox fx:id="movementFormCard" spacing="18.0" styleClass="content-card" prefWidth="390.0" minWidth="370.0" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="0">
                 <padding>
                     <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
                 </padding>
-                <Label text="Nova Movimentacao" styleClass="panel-title" />
+                <VBox spacing="4.0">
+                    <Label text="OPERACAO" styleClass="section-kicker" />
+                    <Label text="Nova Movimentacao" styleClass="panel-title" />
+                    <Label text="Cada registro altera o saldo e ajuda a manter o historico operacional rastreavel." styleClass="section-caption" wrapText="true" />
+                </VBox>
                 <Label fx:id="equipmentSummaryLabel" styleClass="summary-card" wrapText="true" />
                 <Label fx:id="rulesHintLabel" styleClass="summary-card muted" wrapText="true" />
 
@@ -111,32 +119,96 @@
                             <TextField fx:id="quantityField" promptText="Ex.: 1" styleClass="input-field" />
                         </VBox>
 
-                        <VBox spacing="6.0" GridPane.rowIndex="2" GridPane.columnIndex="0">
+                        <Label fx:id="protocolFlowHintLabel" wrapText="true" styleClass="summary-card muted" GridPane.rowIndex="2" GridPane.columnIndex="0" GridPane.columnSpan="2" />
+
+                        <VBox spacing="6.0" GridPane.rowIndex="3" GridPane.columnIndex="0">
                             <Label text="Origem" styleClass="field-label" />
                             <ComboBox fx:id="sourceLocationComboBox" promptText="Selecione" styleClass="input-field" maxWidth="1.7976931348623157E308" />
                         </VBox>
 
-                        <VBox spacing="6.0" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                        <VBox spacing="6.0" GridPane.rowIndex="3" GridPane.columnIndex="1">
                             <Label text="Destino" styleClass="field-label" />
                             <ComboBox fx:id="destinationLocationComboBox" promptText="Selecione" styleClass="input-field" maxWidth="1.7976931348623157E308" />
                         </VBox>
 
-                        <VBox spacing="6.0" GridPane.rowIndex="3" GridPane.columnIndex="0" GridPane.columnSpan="2">
-                            <Label text="Responsavel pela movimentacao" styleClass="field-label" />
+                        <VBox spacing="6.0" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                            <Label fx:id="responsibleNameLabel" text="Responsavel / colaborador" styleClass="field-label" />
                             <TextField fx:id="responsibleNameField" promptText="Ex.: Equipe Infra ou colaborador responsavel" styleClass="input-field" />
                         </VBox>
 
-                        <VBox spacing="6.0" GridPane.rowIndex="4" GridPane.columnIndex="0">
+                        <VBox fx:id="protocolFieldsContainer" spacing="12.0" visible="false" managed="false" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                            <Label fx:id="protocolSectionCaptionLabel" text="Os campos do protocolo aparecem de acordo com o tipo selecionado." styleClass="section-caption" wrapText="true" />
+
+                            <VBox fx:id="deliveryProtocolFieldsContainer" spacing="12.0" visible="false" managed="false">
+                                <GridPane hgap="12.0" vgap="14.0" styleClass="form-grid">
+                                    <columnConstraints>
+                                        <ColumnConstraints percentWidth="50.0" />
+                                        <ColumnConstraints percentWidth="50.0" />
+                                    </columnConstraints>
+
+                                    <VBox spacing="6.0" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                                        <Label text="CPF do colaborador" styleClass="field-label" />
+                                        <TextField fx:id="recipientCpfField" promptText="000.000.000-00" styleClass="input-field" />
+                                    </VBox>
+
+                                    <VBox spacing="6.0" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                                        <Label text="Cargo" styleClass="field-label" />
+                                        <TextField fx:id="recipientRoleField" promptText="Ex.: Analista de Suporte" styleClass="input-field" />
+                                    </VBox>
+                                </GridPane>
+                            </VBox>
+
+                            <VBox fx:id="returnProtocolFieldsContainer" spacing="12.0" visible="false" managed="false">
+                                <GridPane hgap="12.0" vgap="14.0" styleClass="form-grid">
+                                    <columnConstraints>
+                                        <ColumnConstraints percentWidth="50.0" />
+                                        <ColumnConstraints percentWidth="50.0" />
+                                    </columnConstraints>
+
+                                    <VBox spacing="6.0" GridPane.rowIndex="0" GridPane.columnIndex="0">
+                                        <Label text="Colaborador que devolve" styleClass="field-label" />
+                                        <TextField fx:id="returnEmployeeNameField" promptText="Nome do colaborador" styleClass="input-field" />
+                                    </VBox>
+
+                                    <VBox spacing="6.0" GridPane.rowIndex="0" GridPane.columnIndex="1">
+                                        <Label text="CPF do colaborador" styleClass="field-label" />
+                                        <TextField fx:id="returnEmployeeCpfField" promptText="000.000.000-00" styleClass="input-field" />
+                                    </VBox>
+
+                                    <VBox spacing="6.0" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                                        <Label text="Cargo de quem recebeu" styleClass="field-label" />
+                                        <TextField fx:id="companyReceiverRoleField" promptText="Ex.: Analista de Infra" styleClass="input-field" />
+                                    </VBox>
+
+                                    <VBox spacing="6.0" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                                        <Label text="CPF de quem recebeu" styleClass="field-label" />
+                                        <TextField fx:id="companyReceiverCpfField" promptText="000.000.000-00" styleClass="input-field" />
+                                    </VBox>
+
+                                    <VBox spacing="6.0" GridPane.rowIndex="2" GridPane.columnIndex="0">
+                                        <Label text="Motivo da devolucao" styleClass="field-label" />
+                                        <ComboBox fx:id="returnReasonComboBox" promptText="Selecione" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                                    </VBox>
+
+                                    <VBox spacing="6.0" GridPane.rowIndex="2" GridPane.columnIndex="1">
+                                        <Label text="Detalhe do motivo" styleClass="field-label" />
+                                        <TextField fx:id="returnReasonOtherField" promptText="Selecione 'Outros' para detalhar" styleClass="input-field" disable="true" />
+                                    </VBox>
+                                </GridPane>
+                            </VBox>
+                        </VBox>
+
+                        <VBox spacing="6.0" GridPane.rowIndex="6" GridPane.columnIndex="0">
                             <Label text="Data" styleClass="field-label" />
                             <DatePicker fx:id="movementDatePicker" styleClass="input-field" maxWidth="1.7976931348623157E308" />
                         </VBox>
 
-                        <VBox spacing="6.0" GridPane.rowIndex="4" GridPane.columnIndex="1">
+                        <VBox spacing="6.0" GridPane.rowIndex="6" GridPane.columnIndex="1">
                             <Label text="Horario" styleClass="field-label" />
                             <TextField fx:id="movementTimeField" promptText="HH:mm" styleClass="input-field" />
                         </VBox>
 
-                        <VBox spacing="6.0" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2">
+                        <VBox spacing="6.0" GridPane.rowIndex="7" GridPane.columnIndex="0" GridPane.columnSpan="2">
                             <Label text="Observacoes" styleClass="field-label" />
                             <TextArea fx:id="notesArea" promptText="Detalhes da operacao, chamado, motivo ou contexto" prefRowCount="4" styleClass="input-field text-area-field" wrapText="true" />
                         </VBox>
@@ -144,6 +216,15 @@
                 </VBox>
 
                 <Label fx:id="formStatusLabel" wrapText="true" styleClass="form-status-neutral" />
+
+                <VBox fx:id="protocolActionsContainer" spacing="10.0" visible="false" managed="false">
+                    <Label text="Ultimo protocolo gerado" styleClass="field-label" />
+                    <Label fx:id="generatedProtocolPathLabel" wrapText="true" styleClass="summary-card muted" />
+                    <HBox spacing="10.0">
+                        <Button fx:id="openProtocolButton" text="Abrir protocolo" onAction="#handleOpenProtocol" styleClass="secondary-button" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
+                        <Button fx:id="printProtocolButton" text="Imprimir protocolo" onAction="#handlePrintProtocol" styleClass="primary-button" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />
+                    </HBox>
+                </VBox>
 
                 <HBox spacing="10.0">
                     <Button fx:id="registerMovementButton" text="Registrar movimentacao" onAction="#handleRegisterMovement" styleClass="primary-button" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308" />

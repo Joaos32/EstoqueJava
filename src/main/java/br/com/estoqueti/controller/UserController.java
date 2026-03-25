@@ -7,6 +7,8 @@ import br.com.estoqueti.exception.BusinessException;
 import br.com.estoqueti.model.enums.Role;
 import br.com.estoqueti.service.UserService;
 import br.com.estoqueti.session.UserSession;
+import br.com.estoqueti.util.ResponsiveLayoutSupport;
+import br.com.estoqueti.util.UiSupport;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -16,16 +18,28 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class UserController {
 
     private static final DateTimeFormatter LAST_LOGIN_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final UserService userService = new UserService();
+    @FXML
+    private GridPane userLayoutPane;
+
+    @FXML
+    private VBox usersTableCard;
+
+    @FXML
+    private VBox userFormCard;
 
     @FXML
     private TableView<UserListItemDto> userTable;
@@ -73,6 +87,9 @@ public class UserController {
     private Label accessHintLabel;
 
     @FXML
+    private Label resultsSummaryLabel;
+
+    @FXML
     public void initialize() {
         configureTable();
         roleComboBox.setItems(FXCollections.observableArrayList(Role.values()));
@@ -80,6 +97,7 @@ public class UserController {
         activeCheckBox.setSelected(true);
         formStatusLabel.setText("Cadastre usuarios com perfis compativeis com a rotina da equipe.");
         applyStatusStyle("form-status-neutral");
+        ResponsiveLayoutSupport.configureResponsiveSplit(userLayoutPane, usersTableCard, 58, 520, userFormCard, 42, 380, 1120);
         configurePermissions();
         loadUsers();
     }
@@ -125,10 +143,35 @@ public class UserController {
         fullNameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().fullName()));
         usernameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().username()));
         roleColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().role().getDisplayName()));
+        roleColumn.setCellFactory(UiSupport.badgeCellFactory(this::resolveRoleBadgeStyle));
         statusColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().active() ? "Ativo" : "Inativo"));
+        statusColumn.setCellFactory(UiSupport.badgeCellFactory(this::resolveStatusBadgeStyle));
         lastLoginColumn.setCellValueFactory(data -> new SimpleStringProperty(
                 data.getValue().lastLoginAt() == null ? "Nunca acessou" : LAST_LOGIN_FORMATTER.format(data.getValue().lastLoginAt())
         ));
+        userTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        userTable.setPlaceholder(UiSupport.createTablePlaceholder(
+                "Nenhum usuario disponivel",
+                "Assim que novos acessos forem cadastrados, eles aparecerao nesta grade."
+        ));
+        userTable.setRowFactory(ignored -> new TableRow<>() {
+            @Override
+            protected void updateItem(UserListItemDto item, boolean empty) {
+                super.updateItem(item, empty);
+                getStyleClass().removeAll("table-row-muted", "table-row-info");
+
+                if (empty || item == null) {
+                    return;
+                }
+
+                if (!item.active()) {
+                    getStyleClass().add("table-row-muted");
+                } else if (item.role() == Role.ADMIN) {
+                    getStyleClass().add("table-row-info");
+                }
+            }
+        });
     }
 
     private void configurePermissions() {
@@ -149,7 +192,9 @@ public class UserController {
     }
 
     private void loadUsers() {
-        userTable.setItems(FXCollections.observableArrayList(userService.listUsers()));
+        List<UserListItemDto> users = userService.listUsers();
+        userTable.setItems(FXCollections.observableArrayList(users));
+        updateResultsSummary(users.size());
     }
 
     private void clearForm() {
@@ -165,5 +210,28 @@ public class UserController {
         formStatusLabel.getStyleClass().removeAll("form-status-neutral", "form-status-error", "form-status-success");
         formStatusLabel.getStyleClass().add(styleClass);
     }
-}
 
+    private void updateResultsSummary(int resultCount) {
+        if (resultCount == 0) {
+            resultsSummaryLabel.setText("Nenhum acesso cadastrado ate o momento");
+            return;
+        }
+
+        resultsSummaryLabel.setText(resultCount == 1
+                ? "1 perfil ativo na operacao"
+                : resultCount + " perfis ativos na operacao");
+    }
+
+    private String resolveRoleBadgeStyle(String role) {
+        return switch (role) {
+            case "Administrador" -> "badge-danger";
+            case "Tecnico" -> "badge-info";
+            case "Visualizador" -> "badge-neutral";
+            default -> "badge-neutral";
+        };
+    }
+
+    private String resolveStatusBadgeStyle(String status) {
+        return "Ativo".equals(status) ? "badge-success" : "badge-muted";
+    }
+}

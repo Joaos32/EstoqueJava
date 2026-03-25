@@ -1,16 +1,24 @@
 package br.com.estoqueti.util;
 
 import br.com.estoqueti.AppLauncher;
+import javafx.animation.FadeTransition;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.net.URL;
 
 public final class ViewManager {
+
+    private static final Duration SCENE_TRANSITION_DURATION = Duration.millis(260);
+    private static final double LOGIN_MIN_WIDTH = 900;
+    private static final double LOGIN_MIN_HEIGHT = 640;
+    private static final double MAIN_MIN_WIDTH = 980;
+    private static final double MAIN_MIN_HEIGHT = 680;
 
     public static final String LOGIN_VIEW = "/br/com/estoqueti/view/fxml/login-view.fxml";
     public static final String MAIN_LAYOUT_VIEW = "/br/com/estoqueti/view/fxml/main-layout-view.fxml";
@@ -25,11 +33,11 @@ public final class ViewManager {
     }
 
     public static void showLogin(Stage stage) {
-        showView(stage, LOGIN_VIEW, "EstoqueTI Desktop - Login", 1040, 720);
+        showView(stage, LOGIN_VIEW, "EstoqueTI Desktop - Login", 1040, 720, LOGIN_MIN_WIDTH, LOGIN_MIN_HEIGHT);
     }
 
     public static void showMainLayout(Stage stage) {
-        showView(stage, MAIN_LAYOUT_VIEW, "EstoqueTI Desktop", 1360, 820);
+        showView(stage, MAIN_LAYOUT_VIEW, "EstoqueTI Desktop", 1360, 820, MAIN_MIN_WIDTH, MAIN_MIN_HEIGHT);
     }
 
     public static void showLogin(Node sourceNode) {
@@ -49,17 +57,27 @@ public final class ViewManager {
         }
     }
 
-    private static void showView(Stage stage, String resourcePath, String title, double width, double height) {
+    private static void showView(Stage stage, String resourcePath, String title, double width, double height,
+                                 double minWidth, double minHeight) {
         Parent root = loadView(resourcePath);
+        root.setOpacity(0);
+
         Scene scene = new Scene(root, width, height);
         scene.getStylesheets().add(resolveResource(STYLESHEET).toExternalForm());
         stage.setTitle(title);
         stage.setScene(scene);
+        stage.setMinWidth(minWidth);
+        stage.setMinHeight(minHeight);
         stage.centerOnScreen();
         stage.setIconified(false);
         stage.show();
         stage.toFront();
         stage.requestFocus();
+
+        FadeTransition fadeTransition = new FadeTransition(SCENE_TRANSITION_DURATION, root);
+        fadeTransition.setFromValue(0);
+        fadeTransition.setToValue(1);
+        fadeTransition.play();
     }
 
     private static URL resolveResource(String resourcePath) {

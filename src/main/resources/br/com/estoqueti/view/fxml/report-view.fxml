@@ -7,6 +7,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Priority?>
@@ -18,18 +19,21 @@
             fx:controller="br.com.estoqueti.controller.ReportController"
             styleClass="module-root">
     <center>
-        <GridPane hgap="20.0" vgap="0.0">
+        <GridPane fx:id="reportLayoutPane" alignment="TOP_LEFT" hgap="20.0" vgap="20.0" maxWidth="1.7976931348623157E308">
             <columnConstraints>
-                <ColumnConstraints percentWidth="46.0" />
-                <ColumnConstraints percentWidth="54.0" />
+                <ColumnConstraints percentWidth="46.0" hgrow="ALWAYS" fillWidth="true" />
+                <ColumnConstraints percentWidth="54.0" hgrow="ALWAYS" fillWidth="true" />
             </columnConstraints>
 
-            <VBox spacing="18.0" styleClass="content-card" GridPane.columnIndex="0">
+            <VBox fx:id="reportFiltersCard" spacing="18.0" styleClass="content-card" prefWidth="480.0" minWidth="420.0" maxWidth="1.7976931348623157E308" GridPane.columnIndex="0" GridPane.rowIndex="0">
                 <padding>
                     <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
                 </padding>
-                <Label text="Central de Relatorios" styleClass="panel-title" />
-                <Label text="Selecione o relatorio desejado e exporte em CSV ou PDF com o mesmo conjunto de dados." styleClass="field-value" wrapText="true" />
+                <VBox spacing="4.0">
+                    <Label text="EXPORTACAO" styleClass="section-kicker" />
+                    <Label text="Central de Relatorios" styleClass="panel-title" />
+                    <Label text="Selecione o relatorio desejado e exporte em CSV ou PDF com o mesmo conjunto de dados." styleClass="field-value" wrapText="true" />
+                </VBox>
 
                 <GridPane hgap="12.0" vgap="14.0" styleClass="form-grid">
                     <columnConstraints>
@@ -56,19 +60,23 @@
                 <Label fx:id="reportDescriptionLabel" styleClass="summary-card" wrapText="true" />
                 <Label fx:id="periodHintLabel" styleClass="summary-card muted" wrapText="true" />
 
-                <HBox spacing="10.0">
+                <FlowPane alignment="CENTER_LEFT" hgap="10.0" vgap="10.0" styleClass="table-toolbar">
                     <Button text="Atualizar resumo" onAction="#handleRefreshPreview" styleClass="secondary-button" />
-                    <Region HBox.hgrow="ALWAYS" />
+
                     <Button fx:id="exportCsvButton" text="Exportar CSV" onAction="#handleExportCsv" styleClass="primary-button" />
                     <Button fx:id="exportPdfButton" text="Exportar PDF" onAction="#handleExportPdf" styleClass="secondary-button" />
-                </HBox>
+                </FlowPane>
             </VBox>
 
-            <VBox spacing="18.0" styleClass="content-card" GridPane.columnIndex="1">
+            <VBox fx:id="reportPreviewCard" spacing="18.0" styleClass="content-card" prefWidth="520.0" minWidth="440.0" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="0">
                 <padding>
                     <Insets top="22.0" right="22.0" bottom="22.0" left="22.0" />
                 </padding>
-                <Label text="Resumo da Exportacao" styleClass="panel-title" />
+                <VBox spacing="4.0">
+                    <Label text="PREVIEW" styleClass="section-kicker" />
+                    <Label text="Resumo da Exportacao" styleClass="panel-title" />
+                    <Label text="O preview acompanha os filtros atuais para evitar exportacoes desalinhadas com a analise." styleClass="section-caption" wrapText="true" />
+                </VBox>
 
                 <VBox spacing="12.0" styleClass="report-preview-card">
                     <padding>
