@@ -14,7 +14,10 @@ out/
 Thumbs.db
 .DS_Store
 hs_err_pid*
+application-local.properties
+config/application-local.properties
 src/main/resources/application-local.properties
+database/postgresql/03-bootstrap-admin.sql
 dist/
 app/
 app-backup-*/

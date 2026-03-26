@@ -89,22 +89,16 @@ public class DeliveryProtocolDocumentService {
     }
 
     private InputStream openTemplateStream() throws IOException {
-        Path externalTemplate = Path.of(ROOT_TEMPLATE_NAME);
-        if (Files.exists(externalTemplate)) {
-            return Files.newInputStream(externalTemplate);
-        }
-
         InputStream resourceStream = DeliveryProtocolDocumentService.class.getResourceAsStream(RESOURCE_TEMPLATE_PATH);
         if (resourceStream == null) {
-            throw new IllegalStateException("Modelo de protocolo nao encontrado no projeto nem nos recursos da aplicacao.");
+            throw new IllegalStateException("Modelo de protocolo nao encontrado nos recursos da aplicacao.");
         }
         return resourceStream;
     }
 
     private byte[] buildDocumentXml(byte[] originalXml, DeliveryProtocolDocumentData documentData) {
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
+            DocumentBuilderFactory factory = createSecureDocumentBuilderFactory();
             Document document = factory.newDocumentBuilder().parse(new ByteArrayInputStream(originalXml));
 
             fillProtocolNumber(document, documentData.protocolNumber());
@@ -113,7 +107,7 @@ public class DeliveryProtocolDocumentService {
             fillDateLine(document, documentData.deliveryAt().atZoneSameInstant(ZoneId.systemDefault()).toLocalDate());
             fillSignatureTable(document, documentData.recipientName(), documentData.recipientRole(), documentData.recipientCpf());
 
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            TransformerFactory transformerFactory = createSecureTransformerFactory();
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
@@ -125,6 +119,27 @@ public class DeliveryProtocolDocumentService {
         } catch (Exception exception) {
             throw new IllegalStateException("Nao foi possivel preencher o modelo DOCX do protocolo.", exception);
         }
+    }
+
+    private DocumentBuilderFactory createSecureDocumentBuilderFactory() throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        factory.setXIncludeAware(false);
+        factory.setExpandEntityReferences(false);
+        return factory;
+    }
+
+    private TransformerFactory createSecureTransformerFactory() throws Exception {
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        return transformerFactory;
     }
 
     private void fillProtocolNumber(Document document, String protocolNumber) {

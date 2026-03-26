@@ -32,6 +32,8 @@ public class UserController {
     private static final DateTimeFormatter LAST_LOGIN_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final UserService userService = new UserService();
+    private AuthenticatedUserDto authenticatedUser;
+
     @FXML
     private GridPane userLayoutPane;
 
@@ -91,6 +93,7 @@ public class UserController {
 
     @FXML
     public void initialize() {
+        authenticatedUser = UserSession.requireAuthenticatedUser();
         configureTable();
         roleComboBox.setItems(FXCollections.observableArrayList(Role.values()));
         roleComboBox.getSelectionModel().select(Role.TECNICO);
@@ -99,7 +102,16 @@ public class UserController {
         applyStatusStyle("form-status-neutral");
         ResponsiveLayoutSupport.configureResponsiveSplit(userLayoutPane, usersTableCard, 58, 520, userFormCard, 42, 380, 1120);
         configurePermissions();
-        loadUsers();
+        if (authenticatedUser.canManageUsers()) {
+            loadUsers();
+        } else {
+            userTable.setDisable(true);
+            userTable.setPlaceholder(UiSupport.createTablePlaceholder(
+                    "Acesso restrito",
+                    "Somente administradores podem visualizar os usuarios cadastrados."
+            ));
+            resultsSummaryLabel.setText("Consulta de usuarios restrita a administradores");
+        }
     }
 
     @FXML
@@ -119,7 +131,7 @@ public class UserController {
                             roleComboBox.getValue(),
                             activeCheckBox.isSelected()
                     ),
-                    UserSession.requireAuthenticatedUser()
+                    authenticatedUser
             );
 
             formStatusLabel.setText("Usuario cadastrado com sucesso: " + createdUser.username());
@@ -175,12 +187,11 @@ public class UserController {
     }
 
     private void configurePermissions() {
-        AuthenticatedUserDto authenticatedUser = UserSession.requireAuthenticatedUser();
         boolean canManageUsers = authenticatedUser.canManageUsers();
 
         accessHintLabel.setText(canManageUsers
                 ? "Voce esta autenticado como administrador e pode cadastrar novos usuarios."
-                : "Seu perfil possui acesso somente de consulta para usuarios.");
+                : "Seu perfil nao possui permissao para consultar nem cadastrar usuarios.");
 
         fullNameField.setDisable(!canManageUsers);
         usernameField.setDisable(!canManageUsers);
@@ -192,7 +203,7 @@ public class UserController {
     }
 
     private void loadUsers() {
-        List<UserListItemDto> users = userService.listUsers();
+        List<UserListItemDto> users = userService.listUsers(authenticatedUser);
         userTable.setItems(FXCollections.observableArrayList(users));
         updateResultsSummary(users.size());
     }

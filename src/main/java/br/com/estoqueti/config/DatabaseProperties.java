@@ -29,7 +29,7 @@ public record DatabaseProperties(
                 ApplicationProperties.getRequired("database.url"),
                 ApplicationProperties.getRequired("database.username"),
                 ApplicationProperties.get("database.password", ""),
-                ApplicationProperties.get("database.schema", "public"),
+                resolveSchema(),
                 ApplicationProperties.get("database.hikari.pool-name", "EstoqueTIHikariPool"),
                 ApplicationProperties.getInt("database.hikari.minimum-idle", 2),
                 ApplicationProperties.getInt("database.hikari.maximum-pool-size", 10),
@@ -50,5 +50,13 @@ public record DatabaseProperties(
 
     public String displayUrl() {
         return url;
+    }
+
+    private static String resolveSchema() {
+        String configuredSchema = ApplicationProperties.get("database.schema", "public");
+        if (configuredSchema == null || configuredSchema.isBlank()) {
+            return "public";
+        }
+        return SqlIdentifierValidator.requireSimpleIdentifier(configuredSchema, "database.schema");
     }
 }

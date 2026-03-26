@@ -17,7 +17,9 @@ import br.com.estoqueti.exception.ValidationException;
 import br.com.estoqueti.model.enums.EquipmentStatus;
 import br.com.estoqueti.model.enums.MovementType;
 import br.com.estoqueti.model.enums.Role;
+import br.com.estoqueti.support.IntegrationTestDatabaseSupport;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,6 +40,11 @@ class StockMovementServiceIntegrationTest {
 
     private final EquipmentService equipmentService = new EquipmentService();
     private final StockMovementService stockMovementService = new StockMovementService();
+
+    @BeforeAll
+    static void prepareBaseline() {
+        IntegrationTestDatabaseSupport.ensureBaselineData();
+    }
 
     @AfterEach
     void cleanUpTestData() {
@@ -70,7 +77,7 @@ class StockMovementServiceIntegrationTest {
 
     @Test
     void shouldRejectMovementRegistrationForViewerProfile() {
-        AuthenticatedUserDto viewer = new AuthenticatedUserDto(3L, "Paula Visualizacao", "visual", Role.VISUALIZADOR, true);
+        AuthenticatedUserDto viewer = IntegrationTestDatabaseSupport.viewerUser();
 
         assertThrows(AuthorizationException.class, () -> stockMovementService.registerMovement(
                 new StockMovementCreateRequest(1L, MovementType.ENTRADA, 1, null, 1L, "Equipe TI", nowOffset(), "Teste"),
@@ -269,7 +276,7 @@ class StockMovementServiceIntegrationTest {
     }
 
     private AuthenticatedUserDto adminUser() {
-        return new AuthenticatedUserDto(1L, "Administrador do Sistema", "admin", Role.ADMIN, true);
+        return IntegrationTestDatabaseSupport.adminUser();
     }
 
     private java.time.OffsetDateTime nowOffset() {

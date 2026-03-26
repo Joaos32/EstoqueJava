@@ -24,12 +24,32 @@ public class CsvReportExporter {
             try (Writer writer = Files.newBufferedWriter(outputPath);
                  CSVPrinter csvPrinter = new CSVPrinter(writer, csvFormat)) {
                 for (var row : document.rows()) {
-                    csvPrinter.printRecord(row);
+                    csvPrinter.printRecord(row.stream()
+                            .map(this::sanitizeCell)
+                            .toList());
                 }
                 csvPrinter.flush();
             }
         } catch (IOException exception) {
             throw new IllegalStateException("Nao foi possivel exportar o relatorio em CSV.", exception);
         }
+    }
+
+    private String sanitizeCell(String value) {
+        if (value == null || value.isEmpty()) {
+            return value;
+        }
+
+        char firstCharacter = value.charAt(0);
+        if (firstCharacter == '='
+                || firstCharacter == '+'
+                || firstCharacter == '-'
+                || firstCharacter == '@'
+                || firstCharacter == '\t'
+                || firstCharacter == '\r') {
+            return "'" + value;
+        }
+
+        return value;
     }
 }

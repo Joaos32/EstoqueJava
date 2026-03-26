@@ -83,25 +83,16 @@ public class ReturnProtocolDocumentService {
     }
 
     private InputStream openTemplateStream() throws IOException {
-        Path externalTemplate = Path.of(ROOT_TEMPLATE_NAME_WITH_ACCENT);
-        if (!Files.exists(externalTemplate)) {
-            externalTemplate = Path.of(ROOT_TEMPLATE_NAME);
-        }
-        if (Files.exists(externalTemplate)) {
-            return Files.newInputStream(externalTemplate);
-        }
-
         InputStream resourceStream = ReturnProtocolDocumentService.class.getResourceAsStream(RESOURCE_TEMPLATE_PATH);
         if (resourceStream == null) {
-            throw new IllegalStateException("Modelo de protocolo de devolucao nao encontrado no projeto nem nos recursos da aplicacao.");
+            throw new IllegalStateException("Modelo de protocolo de devolucao nao encontrado nos recursos da aplicacao.");
         }
         return resourceStream;
     }
 
     private byte[] buildDocumentXml(byte[] originalXml, ReturnProtocolDocumentData documentData) {
         try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(true);
+            DocumentBuilderFactory factory = createSecureDocumentBuilderFactory();
             Document document = factory.newDocumentBuilder().parse(new ByteArrayInputStream(originalXml));
 
             fillProtocolNumber(document, documentData.protocolNumber());
@@ -111,7 +102,7 @@ public class ReturnProtocolDocumentService {
             fillDateLine(document, documentData.returnedAt().atZoneSameInstant(ZoneId.systemDefault()).toLocalDate());
             fillSignatureTable(document, documentData.companyReceiverName(), documentData.companyReceiverRole(), documentData.companyReceiverCpf());
 
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            TransformerFactory transformerFactory = createSecureTransformerFactory();
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
@@ -123,6 +114,27 @@ public class ReturnProtocolDocumentService {
         } catch (Exception exception) {
             throw new IllegalStateException("Nao foi possivel preencher o modelo DOCX do protocolo de devolucao.", exception);
         }
+    }
+
+    private DocumentBuilderFactory createSecureDocumentBuilderFactory() throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        factory.setXIncludeAware(false);
+        factory.setExpandEntityReferences(false);
+        return factory;
+    }
+
+    private TransformerFactory createSecureTransformerFactory() throws Exception {
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+        return transformerFactory;
     }
 
     private void fillProtocolNumber(Document document, String protocolNumber) {

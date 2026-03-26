@@ -18,7 +18,9 @@ import br.com.estoqueti.model.enums.EquipmentStatus;
 import br.com.estoqueti.model.enums.MovementType;
 import br.com.estoqueti.model.enums.ReturnProtocolReason;
 import br.com.estoqueti.model.enums.Role;
+import br.com.estoqueti.support.IntegrationTestDatabaseSupport;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -47,6 +49,11 @@ class ReturnProtocolServiceIntegrationTest {
     private final StockMovementService stockMovementService = new StockMovementService();
     private final ReturnProtocolService returnProtocolService = new ReturnProtocolService();
     private final List<Path> generatedFiles = new ArrayList<>();
+
+    @BeforeAll
+    static void prepareBaseline() {
+        IntegrationTestDatabaseSupport.ensureBaselineData();
+    }
 
     @AfterEach
     void cleanUpTestData() {
@@ -231,7 +238,7 @@ class ReturnProtocolServiceIntegrationTest {
     }
 
     private AuthenticatedUserDto adminUser() {
-        return new AuthenticatedUserDto(1L, "Administrador do Sistema", "admin", Role.ADMIN, true);
+        return IntegrationTestDatabaseSupport.adminUser();
     }
 
     private java.time.OffsetDateTime nowOffset() {

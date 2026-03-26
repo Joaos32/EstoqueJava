@@ -1,0 +1,40 @@
+DO $$
+DECLARE
+    v_full_name TEXT := 'ALTERE_NOME_DO_ADMIN';
+    v_username TEXT := 'ALTERE_LOGIN_DO_ADMIN';
+    v_password TEXT := 'ALTERE_SENHA_FORTE_DO_ADMIN';
+BEGIN
+    IF v_full_name LIKE 'ALTERE_%'
+       OR v_username LIKE 'ALTERE_%'
+       OR v_password LIKE 'ALTERE_%' THEN
+        RAISE EXCEPTION 'Atualize nome, login e senha antes de executar o bootstrap.';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1
+        FROM estoque_ti.app_user
+        WHERE LOWER(username) = LOWER(v_username)
+          AND LOWER(username) <> LOWER('admin')
+    ) THEN
+        RAISE EXCEPTION 'Ja existe um usuario com o login informado: %', v_username;
+    END IF;
+
+    UPDATE estoque_ti.app_user
+       SET full_name = v_full_name,
+           username = v_username,
+           password_hash = crypt(v_password, gen_salt('bf', 12)),
+           role = 'ADMIN',
+           active = TRUE
+     WHERE LOWER(username) = LOWER('admin');
+
+    IF NOT FOUND THEN
+        INSERT INTO estoque_ti.app_user (full_name, username, password_hash, role, active)
+        VALUES (
+            v_full_name,
+            v_username,
+            crypt(v_password, gen_salt('bf', 12)),
+            'ADMIN',
+            TRUE
+        );
+    END IF;
+END $$;

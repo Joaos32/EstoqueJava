@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Properties;
@@ -13,7 +15,10 @@ public final class ApplicationProperties {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationProperties.class);
     private static final String BASE_RESOURCE_NAME = "application.properties";
-    private static final String LOCAL_RESOURCE_NAME = "application-local.properties";
+    private static final String LOCAL_FILE_NAME = "application-local.properties";
+    private static final String CONFIG_FILE_PROPERTY = "estoqueti.config.file";
+    private static final Path CONFIG_DIRECTORY_LOCAL_FILE = Path.of("config", LOCAL_FILE_NAME);
+    private static final Path ROOT_LOCAL_FILE = Path.of(LOCAL_FILE_NAME);
     private static final Properties PROPERTIES = new Properties();
     private static volatile boolean loaded;
 
@@ -27,7 +32,7 @@ public final class ApplicationProperties {
 
         PROPERTIES.clear();
         loadRequiredResource(BASE_RESOURCE_NAME);
-        loadOptionalResource(LOCAL_RESOURCE_NAME);
+        loadOptionalOverrides();
         loaded = true;
         LOGGER.info("Propriedades da aplicacao carregadas com sucesso.");
     }
@@ -84,18 +89,30 @@ public final class ApplicationProperties {
         }
     }
 
-    private static void loadOptionalResource(String resourceName) {
-        try (InputStream inputStream = ApplicationProperties.class.getClassLoader().getResourceAsStream(resourceName)) {
-            if (inputStream == null) {
-                return;
-            }
+    private static void loadOptionalOverrides() {
+        String configuredPath = System.getProperty(CONFIG_FILE_PROPERTY);
+        if (hasText(configuredPath)) {
+            loadOptionalFile(Path.of(configuredPath.trim()));
+            return;
+        }
 
+        loadOptionalFile(CONFIG_DIRECTORY_LOCAL_FILE);
+        loadOptionalFile(ROOT_LOCAL_FILE);
+    }
+
+    private static void loadOptionalFile(Path filePath) {
+        Path normalizedPath = filePath.toAbsolutePath().normalize();
+        if (!Files.isRegularFile(normalizedPath)) {
+            return;
+        }
+
+        try (InputStream inputStream = Files.newInputStream(normalizedPath)) {
             Properties overrideProperties = new Properties();
             overrideProperties.load(inputStream);
             PROPERTIES.putAll(overrideProperties);
-            LOGGER.info("Arquivo opcional de propriedades carregado: {}", resourceName);
+            LOGGER.info("Arquivo opcional de propriedades carregado: {}", normalizedPath);
         } catch (IOException exception) {
-            throw new IllegalStateException("Nao foi possivel carregar o arquivo opcional de propriedades: " + resourceName, exception);
+            throw new IllegalStateException("Nao foi possivel carregar o arquivo opcional de propriedades: " + normalizedPath, exception);
         }
     }
 

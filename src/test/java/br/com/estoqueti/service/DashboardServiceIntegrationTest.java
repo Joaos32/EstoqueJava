@@ -5,7 +5,9 @@ import br.com.estoqueti.config.EntityManagerFactoryProvider;
 import br.com.estoqueti.dto.dashboard.DashboardLowStockItemDto;
 import br.com.estoqueti.dto.dashboard.DashboardSummaryDto;
 import br.com.estoqueti.dto.movement.StockMovementListItemDto;
+import br.com.estoqueti.support.IntegrationTestDatabaseSupport;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -18,6 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class DashboardServiceIntegrationTest {
 
     private final DashboardService dashboardService = new DashboardService();
+
+    @BeforeAll
+    static void prepareBaseline() {
+        IntegrationTestDatabaseSupport.ensureBaselineData();
+    }
 
     @AfterAll
     static void tearDown() {

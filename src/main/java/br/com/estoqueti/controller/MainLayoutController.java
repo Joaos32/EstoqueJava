@@ -21,7 +21,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.InputEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
@@ -32,10 +34,17 @@ public class MainLayoutController {
 
     private static final Duration CONTENT_TRANSITION_DURATION = Duration.millis(220);
     private static final Duration SCROLL_ANIMATION_DURATION = Duration.millis(180);
+    private static final Duration SESSION_CHECK_INTERVAL = Duration.seconds(20);
     private static final double SCROLL_DELTA_MULTIPLIER = 1.15;
 
     private Timeline scrollAnimation;
+    private Timeline sessionMonitor;
     private double targetScrollValue;
+    private AuthenticatedUserDto authenticatedUser;
+    private boolean redirectingToLogin;
+
+    @FXML
+    private BorderPane mainRoot;
 
     @FXML
     private Label currentUserNameLabel;
@@ -75,12 +84,15 @@ public class MainLayoutController {
 
     @FXML
     public void initialize() {
-        AuthenticatedUserDto authenticatedUser = UserSession.requireAuthenticatedUser();
+        authenticatedUser = UserSession.requireAuthenticatedUser();
         currentUserNameLabel.setText(authenticatedUser.fullName());
         currentUsernameLabel.setText("@" + authenticatedUser.username());
         currentUserRoleLabel.setText(authenticatedUser.role().getDisplayName());
+        usersMenuButton.setVisible(authenticatedUser.canManageUsers());
+        usersMenuButton.setManaged(authenticatedUser.canManageUsers());
         contentContainer.setAlignment(Pos.TOP_LEFT);
         configureContentScroll();
+        configureSessionMonitoring();
         showDashboardModule();
     }
 
@@ -101,6 +113,10 @@ public class MainLayoutController {
 
     @FXML
     private void handleUsersMenu() {
+        if (!authenticatedUser.canManageUsers()) {
+            showDashboardModule();
+            return;
+        }
         showModule("Usuarios", usersMenuButton, ViewManager.USER_VIEW);
     }
 
@@ -111,6 +127,7 @@ public class MainLayoutController {
 
     @FXML
     private void handleLogout() {
+        stopSessionMonitor();
         UserSession.logout();
         ViewManager.showLogin(logoutButton);
     }
@@ -126,6 +143,51 @@ public class MainLayoutController {
         contentScrollPane.viewportBoundsProperty().addListener((observable, oldBounds, bounds) ->
                 contentContainer.setPrefWidth(bounds.getWidth()));
         contentScrollPane.addEventFilter(ScrollEvent.SCROLL, this::handleSmoothScroll);
+    }
+
+    private void configureSessionMonitoring() {
+        UserSession.touch();
+        mainRoot.addEventFilter(InputEvent.ANY, this::handleSessionActivity);
+        sessionMonitor = new Timeline(new KeyFrame(SESSION_CHECK_INTERVAL, event -> enforceActiveSession()));
+        sessionMonitor.setCycleCount(Timeline.INDEFINITE);
+        sessionMonitor.play();
+    }
+
+    private void handleSessionActivity(InputEvent event) {
+        if (UserSession.touch()) {
+            return;
+        }
+        redirectToLogin(event);
+    }
+
+    private void enforceActiveSession() {
+        if (!UserSession.isAuthenticated()) {
+            redirectToLogin(null);
+        }
+    }
+
+    private void redirectToLogin(InputEvent event) {
+        if (redirectingToLogin) {
+            if (event != null) {
+                event.consume();
+            }
+            return;
+        }
+
+        redirectingToLogin = true;
+        stopSessionMonitor();
+        UserSession.logout();
+        if (event != null) {
+            event.consume();
+        }
+        ViewManager.showLogin(mainRoot);
+    }
+
+    private void stopSessionMonitor() {
+        if (sessionMonitor != null) {
+            sessionMonitor.stop();
+            sessionMonitor = null;
+        }
     }
 
     private void handleSmoothScroll(ScrollEvent event) {

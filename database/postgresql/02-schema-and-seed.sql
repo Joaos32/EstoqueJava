@@ -462,9 +462,9 @@ VALUES
 
 INSERT INTO app_user (full_name, username, password_hash, role, active)
 VALUES
-    ('Administrador do Sistema', 'admin', crypt('Admin@123', gen_salt('bf', 10)), 'ADMIN', TRUE),
-    ('Carlos Tecnico', 'tecnico', crypt('Tecnico@123', gen_salt('bf', 10)), 'TECNICO', TRUE),
-    ('Paula Visualizacao', 'visual', crypt('Visual@123', gen_salt('bf', 10)), 'VISUALIZADOR', TRUE);
+    ('Administrador do Sistema (bootstrap pendente)', 'admin', crypt(gen_random_uuid()::text || gen_random_uuid()::text, gen_salt('bf', 12)), 'ADMIN', FALSE),
+    ('Carlos Tecnico (bootstrap pendente)', 'tecnico', crypt(gen_random_uuid()::text || gen_random_uuid()::text, gen_salt('bf', 12)), 'TECNICO', FALSE),
+    ('Paula Visualizacao (bootstrap pendente)', 'visual', crypt(gen_random_uuid()::text || gen_random_uuid()::text, gen_salt('bf', 12)), 'VISUALIZADOR', FALSE);
 
 INSERT INTO equipment (
     internal_code,

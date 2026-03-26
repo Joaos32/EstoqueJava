@@ -98,7 +98,8 @@ Depois execute:
 psql -h localhost -U postgres -d estoqueti -f database/postgresql/02-schema-and-seed.sql
 ```
 
-Os scripts criam o schema `estoque_ti`, constraints, indices e dados iniciais para testes.
+Os scripts criam o schema `estoque_ti`, constraints, indices e dados iniciais para operacao.
+Por seguranca, o seed nao distribui nenhuma senha ativa de acesso ao app.
 
 ## Configuracao local
 
@@ -106,8 +107,9 @@ A configuracao padrao fica em `src/main/resources/application.properties`.
 
 Para manter senha e ajustes locais fora do versionamento:
 
-1. Copie `src/main/resources/application-local.properties.example` para `src/main/resources/application-local.properties`.
+1. Copie `src/main/resources/application-local.properties.example` para `config/application-local.properties` ou `application-local.properties` na raiz do projeto.
 2. Ajuste a senha do PostgreSQL e, se necessario, a URL de conexao.
+3. Prefira um usuario dedicado da aplicacao, sem usar a conta administrativa `postgres`.
 
 Exemplo:
 
@@ -117,12 +119,21 @@ app.version=1.0.0-SNAPSHOT
 
 database.driver-class-name=org.postgresql.Driver
 database.url=jdbc:postgresql://localhost:5432/estoqueti
-database.username=postgres
+database.username=estoqueti_app
 database.password=SUA_SENHA
 database.schema=estoque_ti
 ```
 
-Tambem e possivel sobrescrever propriedades via variaveis de ambiente usando o prefixo `ESTOQUETI_` ou parametros `-D` no Maven.
+Tambem e possivel sobrescrever propriedades via variaveis de ambiente usando o prefixo `ESTOQUETI_`, parametros `-D` no Maven, ou `-Destoqueti.config.file=C:\caminho\application-local.properties`.
+O arquivo local nao e empacotado no `jar` nem no instalador.
+
+## Bootstrap do primeiro acesso
+
+Depois de executar o seed, copie `database/postgresql/03-bootstrap-admin.sql.example` para `database/postgresql/03-bootstrap-admin.sql`, edite nome, login e senha forte do administrador e execute:
+
+```powershell
+psql -h localhost -U postgres -d estoqueti -f database/postgresql/03-bootstrap-admin.sql
+```
 
 ## Como executar
 
@@ -162,13 +173,6 @@ Opcoes adicionais:
 - `-PackageType app-image`: gera somente a versao portatil.
 - `-PackageType msi`: gera MSI via `jpackage`, mas exige WiX Toolset v3 no `PATH`.
 
-## Usuarios iniciais para teste
-
-Os scripts de seed criam os seguintes usuarios:
-
-- `admin` / `Admin@123`
-- `tecnico` / `Tecnico@123`
-- `visual` / `Visual@123`
 
 ## Modulos da interface
 
