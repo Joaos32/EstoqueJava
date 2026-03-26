@@ -144,6 +144,24 @@ mvn "-Ddatabase.password=SUA_SENHA" test
 mvn "-Ddatabase.password=SUA_SENHA" javafx:run
 ```
 
+### Gerar instalador Windows
+
+Para gerar o instalador `.exe` por usuario, sem depender de WiX:
+
+```powershell
+.\scripts\package-windows.ps1 -PackageType exe -SkipTests
+```
+
+Saidas geradas:
+
+- `dist/windows/installer/EstoqueTI Desktop Setup.exe`: instalador Windows com atalho e desinstalador.
+- `dist/windows/app-image`: versao portatil gerada no mesmo processo.
+
+Opcoes adicionais:
+
+- `-PackageType app-image`: gera somente a versao portatil.
+- `-PackageType msi`: gera MSI via `jpackage`, mas exige WiX Toolset v3 no `PATH`.
+
 ## Usuarios iniciais para teste
 
 Os scripts de seed criam os seguintes usuarios:

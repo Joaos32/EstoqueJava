@@ -19,12 +19,12 @@ import br.com.estoqueti.model.enums.MovementType;
 import br.com.estoqueti.repository.AuditLogRepository;
 import br.com.estoqueti.repository.DeliveryProtocolRepository;
 import br.com.estoqueti.repository.EquipmentRepository;
-import br.com.estoqueti.repository.LocationRepository;
+
 import br.com.estoqueti.repository.StockMovementRepository;
 import br.com.estoqueti.repository.impl.JpaAuditLogRepository;
 import br.com.estoqueti.repository.impl.JpaDeliveryProtocolRepository;
 import br.com.estoqueti.repository.impl.JpaEquipmentRepository;
-import br.com.estoqueti.repository.impl.JpaLocationRepository;
+
 import br.com.estoqueti.repository.impl.JpaStockMovementRepository;
 import br.com.estoqueti.util.WorkstationUtils;
 
@@ -62,7 +62,6 @@ public class DeliveryProtocolService {
         try {
             return JpaExecutor.transaction(entityManager -> {
                 EquipmentRepository equipmentRepository = new JpaEquipmentRepository(entityManager);
-                LocationRepository locationRepository = new JpaLocationRepository(entityManager);
                 StockMovementRepository stockMovementRepository = new JpaStockMovementRepository(entityManager);
                 DeliveryProtocolRepository deliveryProtocolRepository = new JpaDeliveryProtocolRepository(entityManager);
                 AuditLogRepository auditLogRepository = new JpaAuditLogRepository(entityManager);
@@ -71,7 +70,8 @@ public class DeliveryProtocolService {
                         .orElseThrow(() -> new ValidationException("Selecione um equipamento valido para entrega."));
 
                 Location sourceLocation = equipment.getLocation();
-                Location destinationLocation = resolveLocation(locationRepository, request.destinationLocationId(), "destino");
+                Location stockControlLocation = sourceLocation;
+                String destinationDescription = normalizeDestinationDescription(request.destinationDescription());
                 String recipientName = InventoryMovementSupport.normalizeRequired(request.recipientName());
                 String recipientCpf = normalizeCpf(request.recipientCpf());
                 String recipientRole = InventoryMovementSupport.normalizeRequired(request.recipientRole());
@@ -79,13 +79,13 @@ public class DeliveryProtocolService {
                 int deliveryQuantity = request.quantity();
 
                 validateEquipmentForDelivery(equipment);
-                InventoryMovementSupport.validateMovementRules(equipment, MovementType.ENTREGA_FUNCIONARIO, deliveryQuantity, sourceLocation, destinationLocation);
+                InventoryMovementSupport.validateMovementRules(equipment, MovementType.ENTREGA_FUNCIONARIO, deliveryQuantity, sourceLocation, stockControlLocation);
 
                 String protocolNumber = generateProtocolNumber(request.deliveryAt());
-                String movementNotes = buildMovementNotes(protocolNumber, notes);
+                String movementNotes = buildMovementNotes(protocolNumber, destinationDescription, notes);
                 String itemDescription = buildItemDescription(equipment);
                 String itemIdentifier = buildItemIdentifier(equipment);
-                String itemObservations = buildItemObservations(sourceLocation, destinationLocation, notes);
+                String itemObservations = buildItemObservations(sourceLocation, destinationDescription, notes);
 
                 DeliveryProtocolDocumentData documentData = new DeliveryProtocolDocumentData(
                         protocolNumber,
@@ -103,7 +103,7 @@ public class DeliveryProtocolService {
                         equipment,
                         MovementType.ENTREGA_FUNCIONARIO,
                         deliveryQuantity,
-                        destinationLocation,
+                        stockControlLocation,
                         recipientName
                 );
                 equipmentRepository.save(equipment);
@@ -113,7 +113,7 @@ public class DeliveryProtocolService {
                         MovementType.ENTREGA_FUNCIONARIO,
                         deliveryQuantity,
                         sourceLocation,
-                        destinationLocation,
+                        stockControlLocation,
                         recipientName,
                         request.deliveryAt(),
                         movementNotes,
@@ -176,8 +176,8 @@ public class DeliveryProtocolService {
         if (request.quantity() <= 0) {
             throw new ValidationException("A quantidade da entrega deve ser maior que zero.");
         }
-        if (request.destinationLocationId() == null) {
-            throw new ValidationException("Selecione a localizacao de destino da entrega.");
+        if (request.destinationDescription() == null || request.destinationDescription().isBlank()) {
+            throw new ValidationException("Informe o destino da entrega.");
         }
         if (request.recipientName() == null || request.recipientName().isBlank()) {
             throw new ValidationException("Informe o nome completo do colaborador responsavel.");
@@ -211,9 +211,12 @@ public class DeliveryProtocolService {
         }
     }
 
-    private Location resolveLocation(LocationRepository locationRepository, Long locationId, String fieldName) {
-        return locationRepository.findActiveById(locationId)
-                .orElseThrow(() -> new ValidationException("Selecione uma localizacao de " + fieldName + " valida."));
+    private String normalizeDestinationDescription(String value) {
+        String normalized = InventoryMovementSupport.normalizeRequired(value);
+        if (normalized == null || normalized.isBlank()) {
+            throw new ValidationException("Informe o destino da entrega.");
+        }
+        return normalized;
     }
 
     private String normalizeCpf(String value) {
@@ -224,11 +227,15 @@ public class DeliveryProtocolService {
         return digits.replaceFirst("(\\d{3})(\\d{3})(\\d{3})(\\d{2})", "$1.$2.$3-$4");
     }
 
-    private String buildMovementNotes(String protocolNumber, String notes) {
+    private String buildMovementNotes(String protocolNumber, String destinationDescription, String notes) {
+        List<String> parts = new ArrayList<>();
+        parts.add("Protocolo " + protocolNumber);
+        parts.add("Destino informado: " + destinationDescription);
         if (notes == null || notes.isBlank()) {
-            return "Protocolo " + protocolNumber;
+            return String.join(" | ", parts);
         }
-        return "Protocolo " + protocolNumber + " | " + notes;
+        parts.add(notes);
+        return String.join(" | ", parts);
     }
 
     private String buildItemDescription(Equipment equipment) {
@@ -255,10 +262,10 @@ public class DeliveryProtocolService {
         return String.join(" | ", identifiers);
     }
 
-    private String buildItemObservations(Location sourceLocation, Location destinationLocation, String notes) {
+    private String buildItemObservations(Location sourceLocation, String destinationDescription, String notes) {
         List<String> observations = new ArrayList<>();
-        observations.add("Origem: " + sourceLocation.getName());
-        observations.add("Destino: " + destinationLocation.getName());
+        observations.add("Local de controle: " + sourceLocation.getName());
+        observations.add("Destino informado: " + destinationDescription);
         if (notes != null && !notes.isBlank()) {
             observations.add(notes);
         }

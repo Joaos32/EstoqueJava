@@ -87,7 +87,7 @@ class DeliveryProtocolServiceIntegrationTest {
                 new DeliveryProtocolCreateRequest(
                         createdEquipment.id(),
                         1,
-                        requireLocation("Escritorio Administrativo").id(),
+                        "Home office - Recife",
                         "Joao Almeida",
                         "12345678901",
                         "Analista de Suporte",
@@ -105,13 +105,14 @@ class DeliveryProtocolServiceIntegrationTest {
         EquipmentListItemDto updatedEquipment = findEquipmentByCode(internalCode);
         assertEquals(EquipmentStatus.EM_USO, updatedEquipment.status());
         assertEquals("Joao Almeida", updatedEquipment.responsibleName());
-        assertEquals("Escritorio Administrativo", updatedEquipment.locationName());
+        assertEquals("Sala Tecnica", updatedEquipment.locationName());
 
         List<StockMovementListItemDto> movements = stockMovementService.searchMovements(
                 new StockMovementSearchFilter(createdEquipment.id(), MovementType.ENTREGA_FUNCIONARIO, null, null)
         );
         assertFalse(movements.isEmpty());
         assertEquals(MovementType.ENTREGA_FUNCIONARIO, movements.get(0).movementType());
+        assertEquals("Home office - Recife", movements.get(0).destinationLocationName());
 
         ProtocolSnapshot snapshot = loadProtocolSnapshot(internalCode);
         assertEquals(result.protocolNumber(), snapshot.protocolNumber());
@@ -124,6 +125,14 @@ class DeliveryProtocolServiceIntegrationTest {
         assertTrue(documentXml.contains("123.456.789-01"));
         assertTrue(documentXml.contains("Analista de Suporte"));
         assertTrue(documentXml.contains(internalCode));
+        assertTrue(documentXml.contains("Home office - Recife"));
+        assertTrue(documentXml.contains("<w:br"));
+        assertTrue(documentXml.contains("w:w=\"4040\""));
+
+        String signatureSection = documentXml.substring(documentXml.indexOf("Assinatura do(a) Colaborador(a)"));
+        assertTrue(signatureSection.indexOf("Nome:") < signatureSection.indexOf("Joao Almeida"));
+        assertTrue(signatureSection.indexOf("Cargo:") < signatureSection.indexOf("Analista de Suporte"));
+        assertTrue(signatureSection.indexOf("CPF:") < signatureSection.indexOf("123.456.789-01"));
     }
 
     @Test
@@ -138,7 +147,7 @@ class DeliveryProtocolServiceIntegrationTest {
                 new DeliveryProtocolCreateRequest(
                         createdEquipment.id(),
                         1,
-                        requireLocation("Escritorio Administrativo").id(),
+                        "Home office - Recife",
                         "Maria Souza",
                         "123",
                         "Analista",

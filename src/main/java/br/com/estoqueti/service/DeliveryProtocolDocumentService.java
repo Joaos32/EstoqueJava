@@ -37,6 +37,14 @@ public class DeliveryProtocolDocumentService {
     private static final String ROOT_TEMPLATE_NAME = "PROTOCOLO DE ENTREGA DE EQUIPAMENTO_NITROLUX_.docx";
     private static final String RESOURCE_TEMPLATE_PATH = "/br/com/estoqueti/template/protocolo-entrega-template.docx";
     private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("MMMM", Locale.forLanguageTag("pt-BR"));
+    private static final String VALUE_SEPARATOR = " | ";
+    private static final String ALIGN_LEFT = "left";
+    private static final String ALIGN_CENTER = "center";
+    private static final String ALIGN_TOP = "top";
+    private static final String ALIGN_BOTTOM = "bottom";
+    private static final int ITEM_ROW_MIN_HEIGHT = 1600;
+    private static final int SIGNATURE_LABEL_CELL_WIDTH = 1500;
+    private static final int SIGNATURE_VALUE_CELL_WIDTH = 4040;
 
     public void generateDocument(DeliveryProtocolDocumentData documentData, Path outputPath) {
         if (documentData == null) {
@@ -159,12 +167,13 @@ public class DeliveryProtocolDocumentService {
             itemsTable.removeChild(rows.get(index));
         }
 
+        configureItemsDataRow(templateRow);
         List<String> values = List.of(
                 "1",
                 String.valueOf(documentData.itemQuantity()),
-                defaultValue(documentData.itemDescription()),
-                defaultValue(documentData.itemIdentifier()),
-                defaultValue(documentData.itemObservations())
+                formatMultilineValue(documentData.itemDescription()),
+                formatMultilineValue(documentData.itemIdentifier()),
+                formatMultilineValue(documentData.itemObservations())
         );
         fillRow(templateRow, values);
         itemsTable.appendChild(templateRow);
@@ -188,13 +197,52 @@ public class DeliveryProtocolDocumentService {
         }
 
         List<Element> rows = childElements(signatureTable, "tr");
-        if (rows.size() < 4) {
+        if (rows.size() < 5) {
             return;
         }
 
-        setSecondCellText(rows.get(1), recipientName);
-        setSecondCellText(rows.get(2), recipientRole);
-        setSecondCellText(rows.get(3), recipientCpf);
+        configureSignatureTable(signatureTable);
+        configureSignatureDataRow(rows.get(1));
+        configureSignatureDataRow(rows.get(2));
+        configureSignatureDataRow(rows.get(3));
+        configureSignatureDataRow(rows.get(4));
+
+        setSecondCellText(rows.get(2), defaultValue(recipientName));
+        setSecondCellText(rows.get(3), defaultValue(recipientRole));
+        setSecondCellText(rows.get(4), defaultValue(recipientCpf));
+    }
+
+    private void configureItemsDataRow(Element row) {
+        setRowMinimumHeight(row, ITEM_ROW_MIN_HEIGHT);
+        List<Element> cells = childElements(row, "tc");
+        for (int index = 0; index < cells.size(); index++) {
+            Element cell = cells.get(index);
+            removeCellNoWrap(cell);
+            setCellVerticalAlignment(cell, index < 2 ? ALIGN_CENTER : ALIGN_TOP);
+        }
+    }
+
+    private void configureSignatureDataRow(Element row) {
+        List<Element> cells = childElements(row, "tc");
+        if (cells.size() < 2) {
+            return;
+        }
+
+        setCellWidth(cells.get(0), SIGNATURE_LABEL_CELL_WIDTH);
+        setCellWidth(cells.get(1), SIGNATURE_VALUE_CELL_WIDTH);
+        removeCellNoWrap(cells.get(0));
+        removeCellNoWrap(cells.get(1));
+        setCellVerticalAlignment(cells.get(0), ALIGN_BOTTOM);
+        setCellVerticalAlignment(cells.get(1), ALIGN_BOTTOM);
+        normalizeExistingCellParagraph(cells.get(0), ALIGN_LEFT);
+        normalizeExistingCellParagraph(cells.get(1), ALIGN_LEFT);
+    }
+
+    private void configureSignatureTable(Element table) {
+        Element tableGrid = ensureChildElement(table, "tblGrid");
+        removeChildElements(tableGrid, "gridCol");
+        appendGridColumn(tableGrid, SIGNATURE_LABEL_CELL_WIDTH);
+        appendGridColumn(tableGrid, SIGNATURE_VALUE_CELL_WIDTH);
     }
 
     private void setSecondCellText(Element row, String value) {
@@ -202,29 +250,51 @@ public class DeliveryProtocolDocumentService {
         if (cells.size() < 2) {
             return;
         }
-        setCellText(cells.get(1), value);
+        setCellText(cells.get(1), value, ALIGN_LEFT);
     }
 
     private void fillRow(Element row, List<String> values) {
         List<Element> cells = childElements(row, "tc");
         for (int index = 0; index < cells.size(); index++) {
             String value = index < values.size() ? values.get(index) : "";
-            setCellText(cells.get(index), value);
+            String alignment = index < 2 ? ALIGN_CENTER : ALIGN_LEFT;
+            setCellText(cells.get(index), value, alignment);
         }
     }
 
-    private void setCellText(Element cell, String text) {
+    private void setCellText(Element cell, String text, String alignment) {
         List<Element> paragraphs = childElements(cell, "p");
+        Element paragraph;
         if (paragraphs.isEmpty()) {
-            Element paragraph = cell.getOwnerDocument().createElementNS(WORD_NS, "w:p");
+            paragraph = cell.getOwnerDocument().createElementNS(WORD_NS, "w:p");
             cell.appendChild(paragraph);
-            setParagraphText(paragraph, text);
-            return;
+        } else {
+            paragraph = paragraphs.get(0);
         }
 
-        setParagraphText(paragraphs.get(0), text);
+        setParagraphText(paragraph, text);
+        normalizeCellParagraphLayout(paragraph, alignment);
+
         for (int index = paragraphs.size() - 1; index >= 1; index--) {
             cell.removeChild(paragraphs.get(index));
+        }
+    }
+
+    private void normalizeExistingCellParagraph(Element cell, String alignment) {
+        List<Element> paragraphs = childElements(cell, "p");
+        if (paragraphs.isEmpty()) {
+            return;
+        }
+        normalizeCellParagraphLayout(paragraphs.get(0), alignment);
+    }
+
+    private void normalizeCellParagraphLayout(Element paragraph, String alignment) {
+        Element paragraphProperties = ensureChildElement(paragraph, "pPr");
+        removeChildElements(paragraphProperties, "ind");
+
+        if (alignment != null) {
+            Element justification = ensureChildElement(paragraphProperties, "jc");
+            justification.setAttributeNS(WORD_NS, "w:val", alignment);
         }
     }
 
@@ -240,16 +310,84 @@ public class DeliveryProtocolDocumentService {
         }
         removableNodes.forEach(paragraph::removeChild);
 
-        Element run = templateRun != null
-                ? (Element) templateRun.cloneNode(true)
-                : paragraph.getOwnerDocument().createElementNS(WORD_NS, "w:r");
-        clearRunContent(run);
+        String normalizedText = text == null ? "" : text.replace("\r\n", "\n").replace('\r', '\n');
+        String[] lines = normalizedText.split("\n", -1);
+        for (int index = 0; index < lines.length; index++) {
+            if (index > 0) {
+                Element breakRun = templateRun != null
+                        ? (Element) templateRun.cloneNode(true)
+                        : paragraph.getOwnerDocument().createElementNS(WORD_NS, "w:r");
+                clearRunContent(breakRun);
+                Element breakElement = paragraph.getOwnerDocument().createElementNS(WORD_NS, "w:br");
+                breakRun.appendChild(breakElement);
+                paragraph.appendChild(breakRun);
+            }
 
-        Element textElement = paragraph.getOwnerDocument().createElementNS(WORD_NS, "w:t");
-        textElement.setTextContent(text == null ? "" : text);
-        textElement.setAttributeNS(XML_NS, "xml:space", "preserve");
-        run.appendChild(textElement);
-        paragraph.appendChild(run);
+            Element run = templateRun != null
+                    ? (Element) templateRun.cloneNode(true)
+                    : paragraph.getOwnerDocument().createElementNS(WORD_NS, "w:r");
+            clearRunContent(run);
+
+            Element textElement = paragraph.getOwnerDocument().createElementNS(WORD_NS, "w:t");
+            textElement.setTextContent(lines[index]);
+            textElement.setAttributeNS(XML_NS, "xml:space", "preserve");
+            run.appendChild(textElement);
+            paragraph.appendChild(run);
+        }
+    }
+
+    private void setCellWidth(Element cell, int width) {
+        Element cellProperties = ensureChildElement(cell, "tcPr");
+        Element cellWidth = ensureChildElement(cellProperties, "tcW");
+        cellWidth.setAttributeNS(WORD_NS, "w:w", String.valueOf(width));
+        cellWidth.setAttributeNS(WORD_NS, "w:type", "dxa");
+    }
+
+    private void setCellVerticalAlignment(Element cell, String alignment) {
+        Element cellProperties = ensureChildElement(cell, "tcPr");
+        Element verticalAlignment = ensureChildElement(cellProperties, "vAlign");
+        verticalAlignment.setAttributeNS(WORD_NS, "w:val", alignment);
+    }
+
+    private void removeCellNoWrap(Element cell) {
+        Element cellProperties = ensureChildElement(cell, "tcPr");
+        removeChildElements(cellProperties, "noWrap");
+    }
+
+    private void setRowMinimumHeight(Element row, int height) {
+        Element rowProperties = ensureChildElement(row, "trPr");
+        Element rowHeight = ensureChildElement(rowProperties, "trHeight");
+        rowHeight.setAttributeNS(WORD_NS, "w:val", String.valueOf(height));
+        rowHeight.setAttributeNS(WORD_NS, "w:hRule", "atLeast");
+    }
+
+    private void appendGridColumn(Element tableGrid, int width) {
+        Element column = tableGrid.getOwnerDocument().createElementNS(WORD_NS, "w:gridCol");
+        column.setAttributeNS(WORD_NS, "w:w", String.valueOf(width));
+        tableGrid.appendChild(column);
+    }
+
+    private Element ensureChildElement(Element parent, String localName) {
+        Element existing = firstChildElement(parent, localName);
+        if (existing != null) {
+            return existing;
+        }
+
+        Element created = parent.getOwnerDocument().createElementNS(WORD_NS, "w:" + localName);
+        parent.appendChild(created);
+        return created;
+    }
+
+    private void removeChildElements(Element parent, String localName) {
+        List<Node> removableNodes = new ArrayList<>();
+        NodeList childNodes = parent.getChildNodes();
+        for (int index = 0; index < childNodes.getLength(); index++) {
+            Node child = childNodes.item(index);
+            if (child.getNodeType() == Node.ELEMENT_NODE && WORD_NS.equals(child.getNamespaceURI()) && localName.equals(child.getLocalName())) {
+                removableNodes.add(child);
+            }
+        }
+        removableNodes.forEach(parent::removeChild);
     }
 
     private void clearRunContent(Element run) {
@@ -347,6 +485,10 @@ public class DeliveryProtocolDocumentService {
 
     private String replaceFirstBlank(String text, String value) {
         return text.replaceFirst("_{5,}", value == null ? "" : value);
+    }
+
+    private String formatMultilineValue(String value) {
+        return defaultValue(value).replace(VALUE_SEPARATOR, "\n");
     }
 
     private String defaultValue(String value) {

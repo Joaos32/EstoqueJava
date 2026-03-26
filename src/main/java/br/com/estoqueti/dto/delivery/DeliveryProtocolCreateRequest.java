@@ -5,7 +5,7 @@ import java.time.OffsetDateTime;
 public record DeliveryProtocolCreateRequest(
         Long equipmentId,
         Integer quantity,
-        Long destinationLocationId,
+        String destinationDescription,
         String recipientName,
         String recipientCpf,
         String recipientRole,

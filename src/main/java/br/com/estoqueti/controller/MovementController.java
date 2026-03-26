@@ -169,6 +169,9 @@ public class MovementController {
     private ComboBox<LookupOptionDto> destinationLocationComboBox;
 
     @FXML
+    private TextField deliveryDestinationField;
+
+    @FXML
     private TextField responsibleNameField;
 
     @FXML
@@ -483,7 +486,7 @@ public class MovementController {
         return new DeliveryProtocolCreateRequest(
                 movementEquipmentComboBox.getValue() == null ? null : movementEquipmentComboBox.getValue().id(),
                 parseRequiredInteger(quantityField.getText()),
-                destinationLocationComboBox.getValue() == null ? null : destinationLocationComboBox.getValue().id(),
+                deliveryDestinationField.getText(),
                 responsibleNameField.getText(),
                 recipientCpfField.getText(),
                 recipientRoleField.getText(),
@@ -619,9 +622,15 @@ public class MovementController {
                 && selectedEquipment != null
                 && selectedEquipment.quantity() > 0
                 && currentLocation != null;
+        boolean useTextDestination = deliveryWithProtocol;
 
         sourceLocationComboBox.setDisable(!sourceRequired);
-        destinationLocationComboBox.setDisable(!destinationRequired || lockDestinationToCurrentLocation);
+        destinationLocationComboBox.setManaged(!useTextDestination);
+        destinationLocationComboBox.setVisible(!useTextDestination);
+        destinationLocationComboBox.setDisable(useTextDestination || !destinationRequired || lockDestinationToCurrentLocation);
+        deliveryDestinationField.setManaged(useTextDestination);
+        deliveryDestinationField.setVisible(useTextDestination);
+        deliveryDestinationField.setDisable(!useTextDestination);
 
         if (sourceRequired && currentLocation != null) {
             sourceLocationComboBox.getSelectionModel().select(currentLocation);
@@ -654,14 +663,14 @@ public class MovementController {
                 : "Ex.: Equipe Infra ou colaborador responsavel");
 
         protocolSectionCaptionLabel.setText(deliveryWithProtocol
-                ? "Dados obrigatorios para gerar o protocolo de entrega em DOCX."
+                ? "Dados obrigatorios para gerar o protocolo de entrega em DOCX, incluindo o destino digitado."
                 : returnWithProtocol
                 ? "Dados obrigatorios para gerar o protocolo de devolucao em DOCX."
                 : "Os campos do protocolo aparecem de acordo com o tipo selecionado.");
 
         registerMovementButton.setText(protocolMovement ? "Gerar protocolo e registrar" : "Registrar movimentacao");
         protocolFlowHintLabel.setText(deliveryWithProtocol
-                ? "Preencha nome, CPF e cargo do colaborador. Ao clicar em gerar, o sistema vai pedir onde salvar o DOCX do protocolo de entrega."
+                ? "Preencha nome, CPF, cargo e o destino em texto livre. Ao clicar em gerar, o sistema vai pedir onde salvar o DOCX do protocolo de entrega."
                 : returnWithProtocol
                 ? "Preencha os dados de quem devolve, de quem recebeu na empresa e o motivo. Ao clicar em gerar, o sistema vai pedir onde salvar o DOCX do protocolo de devolucao."
                 : "Para gerar protocolo, escolha 'Entrega com protocolo' ou 'Devolucao com protocolo'. Os campos do documento aparecem automaticamente.");
@@ -693,7 +702,7 @@ public class MovementController {
             case ENTRADA -> "Entradas aumentam o saldo. Se o registro ja tem saldo, a entrada deve permanecer na localizacao atual.";
             case SAIDA -> "Saidas reduzem o saldo e usam apenas a origem atual do equipamento.";
             case TRANSFERENCIA -> "Transferencias movem o saldo total do registro para outra localizacao, sem alterar a quantidade.";
-            case ENTREGA_FUNCIONARIO -> "Entregas com protocolo transferem o saldo total do registro para o colaborador, marcam o item como Em uso e geram o DOCX oficial para assinatura.";
+            case ENTREGA_FUNCIONARIO -> "Entregas com protocolo transferem o saldo total do registro para o colaborador, usam o destino digitado no protocolo, mantem o controle interno no local atual e geram o DOCX oficial para assinatura.";
             case DEVOLUCAO_FUNCIONARIO -> "Devolucoes com protocolo exigem item em uso, retornam o saldo total para uma localizacao da empresa, voltam o status para Disponivel e geram o DOCX oficial de recebimento.";
             case ENVIO_MANUTENCAO -> "Envio para manutencao move o saldo total para outro local e altera o status para Em manutencao.";
             case RETORNO_MANUTENCAO -> "Retorno de manutencao exige item em manutencao, move o saldo total e volta o status para Disponivel.";
@@ -733,6 +742,7 @@ public class MovementController {
         quantityField.clear();
         sourceLocationComboBox.getSelectionModel().clearSelection();
         destinationLocationComboBox.getSelectionModel().clearSelection();
+        deliveryDestinationField.clear();
         responsibleNameField.clear();
         recipientCpfField.clear();
         recipientRoleField.clear();

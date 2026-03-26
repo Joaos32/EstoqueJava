@@ -129,6 +129,7 @@
                         <VBox spacing="6.0" GridPane.rowIndex="3" GridPane.columnIndex="1">
                             <Label text="Destino" styleClass="field-label" />
                             <ComboBox fx:id="destinationLocationComboBox" promptText="Selecione" styleClass="input-field" maxWidth="1.7976931348623157E308" />
+                            <TextField fx:id="deliveryDestinationField" promptText="Ex.: Home office, filial ou setor do colaborador" styleClass="input-field" visible="false" managed="false" />
                         </VBox>
 
                         <VBox spacing="6.0" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2">
