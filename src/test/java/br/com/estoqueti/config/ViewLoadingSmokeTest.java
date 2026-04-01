@@ -42,6 +42,7 @@ class ViewLoadingSmokeTest {
 
     @Test
     void shouldLoadMainAuthenticatedViews() throws Exception {
+        assertLoads(ViewManager.LOGIN_VIEW);
         assertLoads(ViewManager.MAIN_LAYOUT_VIEW);
         assertLoads(ViewManager.DASHBOARD_VIEW);
         assertLoads(ViewManager.EQUIPMENT_VIEW);

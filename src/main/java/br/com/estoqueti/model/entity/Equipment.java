@@ -146,6 +146,10 @@ public class Equipment {
         this.responsibleName = responsibleName;
     }
 
+    public void deactivate() {
+        this.active = false;
+    }
+
     public Long getId() {
         return id;
     }

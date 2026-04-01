@@ -1,29 +1,29 @@
 .root {
-    -app-bg-0: #f8f3eb;
-    -app-bg-1: #edf2f5;
-    -app-bg-2: #dfe7ee;
-    -app-surface: rgba(255, 252, 247, 0.88);
-    -app-surface-strong: #fffdfa;
-    -app-surface-muted: #eef2f5;
-    -app-border: rgba(22, 44, 63, 0.10);
-    -app-border-strong: rgba(22, 44, 63, 0.18);
-    -app-ink: #163149;
-    -app-ink-muted: #5d7386;
-    -app-ink-soft: #7b8d9c;
-    -app-navy-strong: #0c2132;
-    -app-navy: #173a56;
-    -app-navy-soft: #2d5d7b;
-    -app-accent: #da8443;
-    -app-accent-strong: #bf632d;
-    -app-accent-soft: rgba(218, 132, 67, 0.16);
-    -app-accent-faint: rgba(218, 132, 67, 0.08);
-    -app-success-soft: rgba(58, 143, 103, 0.16);
-    -app-danger-soft: rgba(194, 85, 85, 0.16);
-    -app-warning-soft: rgba(191, 123, 46, 0.18);
-    -app-info-soft: rgba(45, 93, 123, 0.16);
-    -app-muted-soft: rgba(92, 111, 127, 0.14);
-    -app-shadow: rgba(22, 40, 58, 0.12);
-    -app-shadow-strong: rgba(17, 33, 49, 0.20);
+    -app-bg-0: #f7f3ec;
+    -app-bg-1: #f3efe8;
+    -app-bg-2: #ebe5dc;
+    -app-surface: rgba(255, 255, 252, 0.94);
+    -app-surface-strong: #ffffff;
+    -app-surface-muted: #f5f1ea;
+    -app-border: rgba(24, 20, 17, 0.08);
+    -app-border-strong: rgba(24, 20, 17, 0.14);
+    -app-ink: #171411;
+    -app-ink-muted: #665d55;
+    -app-ink-soft: #8b8178;
+    -app-navy-strong: #171411;
+    -app-navy: #2c241d;
+    -app-navy-soft: #5b4d40;
+    -app-accent: #c7833f;
+    -app-accent-strong: #a66221;
+    -app-accent-soft: rgba(199, 131, 63, 0.14);
+    -app-accent-faint: rgba(199, 131, 63, 0.07);
+    -app-success-soft: rgba(58, 143, 103, 0.14);
+    -app-danger-soft: rgba(194, 85, 85, 0.14);
+    -app-warning-soft: rgba(191, 123, 46, 0.14);
+    -app-info-soft: rgba(70, 104, 126, 0.12);
+    -app-muted-soft: rgba(98, 90, 81, 0.10);
+    -app-shadow: rgba(17, 12, 8, 0.06);
+    -app-shadow-strong: rgba(17, 12, 8, 0.10);
     -fx-font-family: "Segoe UI Variable";
     -fx-focus-color: -app-accent;
     -fx-faint-focus-color: transparent;
@@ -33,9 +33,8 @@
 .main-root,
 .login-root {
     -fx-background-color:
-        radial-gradient(focus-angle 0deg, focus-distance 0%, center 15% 16%, radius 54%, rgba(218, 132, 67, 0.18) 0%, rgba(218, 132, 67, 0.0) 52%),
-        radial-gradient(focus-angle 0deg, focus-distance 0%, center 86% 4%, radius 48%, rgba(45, 93, 123, 0.12) 0%, rgba(45, 93, 123, 0.0) 58%),
-        linear-gradient(to bottom right, -app-bg-0 0%, -app-bg-1 44%, -app-bg-2 100%);
+        radial-gradient(focus-angle 0deg, focus-distance 0%, center 12% 10%, radius 32%, rgba(199, 131, 63, 0.10) 0%, rgba(199, 131, 63, 0.0) 56%),
+        linear-gradient(to bottom right, -app-bg-0 0%, -app-bg-1 56%, -app-bg-2 100%);
 }
 
 .login-root {
@@ -47,31 +46,28 @@
 }
 
 .login-brand-card {
-    -fx-background-color:
-        radial-gradient(focus-angle 0deg, focus-distance 0%, center 24% 18%, radius 55%, rgba(225, 146, 83, 0.28) 0%, rgba(225, 146, 83, 0.0) 48%),
-        linear-gradient(to bottom right, #0d2233 0%, #163a57 54%, #245774 100%);
-    -fx-background-radius: 34px;
-    -fx-padding: 36 36 36 36;
-    -fx-border-color: rgba(255, 244, 234, 0.12);
-    -fx-border-radius: 34px;
+    -fx-background-color: linear-gradient(to bottom right, rgba(255, 255, 255, 0.98) 0%, rgba(247, 243, 236, 0.96) 100%);
+    -fx-background-radius: 30px;
+    -fx-padding: 34 34 34 34;
+    -fx-border-color: rgba(24, 20, 17, 0.08);
+    -fx-border-radius: 30px;
     -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(15, 28, 42, 0.28), 38, 0.22, 0, 18);
 }
 
 .login-form-card,
 .content-card {
     -fx-background-color: -app-surface;
-    -fx-background-radius: 26px;
-    -fx-padding: 28 28 28 28;
+    -fx-background-radius: 22px;
+    -fx-padding: 24 24 24 24;
     -fx-border-color: -app-border;
-    -fx-border-radius: 26px;
+    -fx-border-radius: 22px;
     -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, -app-shadow, 26, 0.18, 0, 12);
+    -fx-effect: dropshadow(gaussian, -app-shadow, 14, 0.08, 0, 4);
 }
 
 .login-form-card {
     -fx-max-width: 430px;
-    -fx-background-color: -app-surface-strong;
+    -fx-background-color: rgba(255, 255, 255, 0.98);
 }
 
 .content-shell {
@@ -79,10 +75,10 @@
 }
 
 .eyebrow-label {
-    -fx-background-color: rgba(255, 245, 235, 0.14);
+    -fx-background-color: rgba(24, 20, 17, 0.06);
     -fx-background-radius: 999px;
     -fx-padding: 7 14 7 14;
-    -fx-text-fill: #fff6ef;
+    -fx-text-fill: -app-ink;
     -fx-font-size: 11px;
     -fx-font-weight: 700;
 }
@@ -97,25 +93,25 @@
 }
 
 .login-hero-title {
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 36px;
+    -fx-text-fill: -app-ink;
+    -fx-font-size: 34px;
     -fx-font-weight: 700;
 }
 
 .login-hero-subtitle {
-    -fx-text-fill: rgba(241, 247, 252, 0.86);
+    -fx-text-fill: -app-ink-muted;
     -fx-font-size: 15px;
-    -fx-line-spacing: 2px;
+    -fx-line-spacing: 1px;
 }
 
 .login-bullet {
-    -fx-text-fill: #eef5fb;
+    -fx-text-fill: -app-ink;
     -fx-font-size: 14px;
-    -fx-background-color: rgba(255, 255, 255, 0.08);
-    -fx-background-radius: 18px;
-    -fx-border-color: rgba(255, 255, 255, 0.08);
-    -fx-border-radius: 18px;
-    -fx-padding: 11 14 11 14;
+    -fx-background-color: rgba(24, 20, 17, 0.05);
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(24, 20, 17, 0.06);
+    -fx-border-radius: 14px;
+    -fx-padding: 10 14 10 14;
 }
 
 .section-kicker,
@@ -158,7 +154,7 @@
 }
 
 .field-label.dark {
-    -fx-text-fill: rgba(246, 249, 252, 0.80);
+    -fx-text-fill: -app-ink-soft;
 }
 
 .field-value {
@@ -201,7 +197,6 @@
 .text-area-field:focused {
     -fx-background-color: -app-surface-strong;
     -fx-border-color: -app-accent;
-    -fx-effect: dropshadow(gaussian, rgba(218, 132, 67, 0.18), 14, 0.14, 0, 3);
 }
 
 .combo-box.input-field,
@@ -260,44 +255,43 @@
 }
 
 .primary-button {
-    -fx-background-color: linear-gradient(to right, #e0934b 0%, #cb6c34 100%);
+    -fx-background-color: linear-gradient(to right, #1d1915 0%, #342a21 100%);
     -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-font-weight: 700;
     -fx-background-radius: 16px;
     -fx-padding: 12 18 12 18;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(198, 98, 43, 0.20), 16, 0.18, 0, 6);
 }
 
 .primary-button:hover {
-    -fx-background-color: linear-gradient(to right, #e59c59 0%, #cf733c 100%);
+    -fx-background-color: linear-gradient(to right, #26211c 0%, #403327 100%);
 }
 
 .primary-button:pressed {
-    -fx-background-color: linear-gradient(to right, #d17f3e 0%, #bc5d2a 100%);
+    -fx-background-color: linear-gradient(to right, #14110e 0%, #2c231c 100%);
 }
 
 .secondary-button {
-    -fx-background-color: rgba(23, 58, 86, 0.06);
+    -fx-background-color: rgba(24, 20, 17, 0.05);
     -fx-text-fill: -app-ink;
     -fx-text-background-color: -app-ink;
     -fx-font-size: 13px;
     -fx-font-weight: 700;
     -fx-background-radius: 16px;
-    -fx-border-color: rgba(23, 58, 86, 0.10);
+    -fx-border-color: rgba(24, 20, 17, 0.08);
     -fx-border-radius: 16px;
     -fx-padding: 12 16 12 16;
     -fx-cursor: hand;
 }
 
 .secondary-button:hover {
-    -fx-background-color: rgba(23, 58, 86, 0.10);
-    -fx-border-color: rgba(23, 58, 86, 0.16);
+    -fx-background-color: rgba(24, 20, 17, 0.08);
+    -fx-border-color: rgba(24, 20, 17, 0.12);
 }
 
 .secondary-button:pressed {
-    -fx-background-color: rgba(23, 58, 86, 0.14);
+    -fx-background-color: rgba(24, 20, 17, 0.11);
 }
 
 .button:disabled {
@@ -333,28 +327,26 @@
 }
 
 .sidebar {
-    -fx-background-color:
-        radial-gradient(focus-angle 0deg, focus-distance 0%, center 26% 14%, radius 42%, rgba(220, 137, 73, 0.12) 0%, rgba(220, 137, 73, 0.0) 44%),
-        linear-gradient(to bottom, #0d2233 0%, #163a56 54%, #214c68 100%);
+    -fx-background-color: linear-gradient(to bottom, #171411 0%, #1f1a16 100%);
     -fx-pref-width: 236px;
-    -fx-border-color: rgba(255, 247, 238, 0.08);
+    -fx-border-color: rgba(255, 255, 255, 0.06);
     -fx-border-width: 0 1 0 0;
 }
 
 .sidebar-brand {
     -fx-text-fill: white;
-    -fx-font-size: 26px;
+    -fx-font-size: 23px;
     -fx-font-weight: 700;
 }
 
 .sidebar-subtitle {
-    -fx-text-fill: rgba(233, 241, 247, 0.68);
-    -fx-font-size: 13px;
+    -fx-text-fill: rgba(255, 247, 239, 0.62);
+    -fx-font-size: 12px;
 }
 
 .sidebar-section-label {
-    -fx-text-fill: rgba(233, 241, 247, 0.46);
-    -fx-padding: 10 2 4 2;
+    -fx-text-fill: rgba(255, 247, 239, 0.36);
+    -fx-padding: 12 2 4 2;
 }
 
 .menu-button {
@@ -377,10 +369,9 @@
 }
 
 .menu-button.active {
-    -fx-background-color: rgba(218, 132, 67, 0.18);
-    -fx-border-color: rgba(255, 235, 221, 0.18);
-    -fx-text-fill: #fff9f3;
-    -fx-effect: dropshadow(gaussian, rgba(14, 27, 40, 0.18), 14, 0.16, 0, 4);
+    -fx-background-color: rgba(199, 131, 63, 0.16);
+    -fx-border-color: rgba(255, 255, 255, 0.08);
+    -fx-text-fill: #fffaf5;
 }
 
 .menu-button.logout {
@@ -389,12 +380,11 @@
 }
 
 .topbar {
-    -fx-background-color: rgba(255, 252, 248, 0.62);
-    -fx-background-radius: 24px;
-    -fx-border-color: rgba(22, 44, 63, 0.09);
-    -fx-border-radius: 24px;
+    -fx-background-color: rgba(255, 255, 255, 0.84);
+    -fx-background-radius: 20px;
+    -fx-border-color: rgba(24, 20, 17, 0.07);
+    -fx-border-radius: 20px;
     -fx-border-width: 1;
-    -fx-effect: dropshadow(gaussian, rgba(22, 40, 58, 0.10), 22, 0.14, 0, 10);
 }
 
 .topbar-kicker {
@@ -402,10 +392,10 @@
 }
 
 .topbar-session-card {
-    -fx-background-color: rgba(23, 58, 86, 0.05);
-    -fx-background-radius: 18px;
-    -fx-border-color: rgba(23, 58, 86, 0.08);
-    -fx-border-radius: 18px;
+    -fx-background-color: rgba(24, 20, 17, 0.04);
+    -fx-background-radius: 16px;
+    -fx-border-color: rgba(24, 20, 17, 0.06);
+    -fx-border-radius: 16px;
     -fx-padding: 8 12 8 12;
 }
 
@@ -454,13 +444,13 @@
 }
 
 .table-view {
-    -fx-background-color: rgba(255, 253, 249, 0.98);
+    -fx-background-color: rgba(255, 255, 255, 0.98);
     -fx-background-radius: 18px;
-    -fx-border-color: rgba(22, 44, 63, 0.10);
+    -fx-border-color: rgba(24, 20, 17, 0.08);
     -fx-border-radius: 18px;
     -fx-border-width: 1;
-    -fx-selection-bar: rgba(218, 132, 67, 0.16);
-    -fx-selection-bar-non-focused: rgba(218, 132, 67, 0.10);
+    -fx-selection-bar: rgba(199, 131, 63, 0.16);
+    -fx-selection-bar-non-focused: rgba(199, 131, 63, 0.10);
     -fx-selection-bar-text: -app-ink;
 }
 
@@ -639,9 +629,8 @@
 
 .metric-card {
     -fx-background-radius: 24px;
-    -fx-border-color: rgba(255, 255, 255, 0.14);
+    -fx-border-color: rgba(255, 255, 255, 0.10);
     -fx-border-radius: 24px;
-    -fx-effect: dropshadow(gaussian, rgba(16, 30, 43, 0.18), 24, 0.16, 0, 10);
 }
 
 #metric-total-card {
@@ -726,4 +715,57 @@
 
 .check-box:selected .mark {
     -fx-background-color: white;
+}
+
+
+.brand-lockup {
+    -fx-padding: 0 0 4 0;
+}
+
+.brand-mark-shell {
+    -fx-background-color: rgba(255, 255, 255, 0.96);
+    -fx-background-radius: 22px;
+    -fx-border-color: rgba(24, 20, 17, 0.08);
+    -fx-border-radius: 22px;
+    -fx-padding: 14;
+}
+
+.brand-wordmark {
+    -fx-text-fill: -app-ink;
+    -fx-font-family: "Bahnschrift";
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+}
+
+.brand-submark {
+    -fx-text-fill: -app-ink-muted;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.sidebar-brand-block {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(255, 255, 255, 0.05);
+    -fx-border-radius: 18px;
+    -fx-padding: 10 12 10 12;
+}
+
+.sidebar-brand-mark {
+    -fx-background-color: rgba(255, 255, 255, 0.96);
+    -fx-background-radius: 14px;
+    -fx-padding: 8;
+}
+
+.sidebar-brand-copy {
+    -fx-padding: 0;
+}
+
+.content-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.content-scroll > .viewport {
+    -fx-background-color: transparent;
 }

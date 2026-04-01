@@ -38,7 +38,9 @@
                     <Label fx:id="accessHintLabel" styleClass="field-value" wrapText="true" />
                 </VBox>
                 <FlowPane alignment="CENTER_LEFT" hgap="10.0" vgap="10.0" styleClass="table-toolbar">
-                    <Label text="Perfis, status e ultimo acesso visiveis em uma unica grade." styleClass="section-caption" wrapText="true" maxWidth="1.7976931348623157E308" />
+                    <Label text="Perfis, status e ultimo acesso visiveis em uma unica grade, com redefinicao segura de senha para recuperacao de acesso." styleClass="section-caption" wrapText="true" maxWidth="1.7976931348623157E308" />
+                    <Button fx:id="resetPasswordButton" text="Redefinir senha" onAction="#handleResetPassword" styleClass="secondary-button" />
+                    <Button fx:id="removeUserButton" text="Remover selecionado" onAction="#handleRemoveUser" styleClass="danger-button" />
                     <Label fx:id="resultsSummaryLabel" styleClass="results-chip" />
                 </FlowPane>
                 <TableView fx:id="userTable" VBox.vgrow="ALWAYS" styleClass="table-card">

@@ -82,6 +82,8 @@ public final class IntegrationTestDatabaseSupport {
         insertCategoryIfAbsent(entityManager, "Mouse", "Mouses USB e sem fio");
         insertCategoryIfAbsent(entityManager, "Switch", "Switches gerenciaveis e nao gerenciaveis");
         insertCategoryIfAbsent(entityManager, "SSD", "Unidades de armazenamento SSD");
+        insertCategoryIfAbsent(entityManager, "Escritorio", "Materiais e itens de escritorio");
+        insertCategoryIfAbsent(entityManager, "Equipamento", "Equipamentos gerais e itens diversos de operacao");
     }
 
     private static void ensureLocations(EntityManager entityManager) {
@@ -91,6 +93,7 @@ public final class IntegrationTestDatabaseSupport {
         insertLocationIfAbsent(entityManager, "Filial Sao Paulo", "Unidade operacional de Sao Paulo");
         insertLocationIfAbsent(entityManager, "Manutencao Externa", "Itens enviados para parceiro de manutencao");
         insertLocationIfAbsent(entityManager, "Descarte", "Area destinada a itens baixados ou descartados");
+        insertLocationIfAbsent(entityManager, "Estoque Escritorio", "Estoque de materiais e itens de escritorio");
     }
 
     private static void ensureSuppliers(EntityManager entityManager) {

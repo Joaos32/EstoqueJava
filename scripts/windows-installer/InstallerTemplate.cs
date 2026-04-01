@@ -152,6 +152,11 @@ internal static class Program
             }
 
             Log("Installation completed successfully.");
+            if (!_silent)
+            {
+                MessageBox.Show("Instalacao concluida com sucesso.", AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
             if (!_noLaunch)
             {
                 Process.Start(new ProcessStartInfo
@@ -160,11 +165,6 @@ internal static class Program
                     WorkingDirectory = _installDir,
                     UseShellExecute = true
                 });
-            }
-
-            if (!_silent)
-            {
-                MessageBox.Show("Instalacao concluida com sucesso.", AppName, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
         finally
@@ -427,4 +427,5 @@ internal static class Program
         File.AppendAllText(_logPath, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " " + message + Environment.NewLine, Encoding.UTF8);
     }
 }
+
 

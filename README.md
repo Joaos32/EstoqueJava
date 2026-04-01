@@ -157,16 +157,15 @@ mvn "-Ddatabase.password=SUA_SENHA" javafx:run
 
 ### Gerar instalador Windows
 
-Para gerar o instalador `.exe` por usuario, sem depender de WiX:
+Para gerar um unico `.exe` por usuario, sem depender de WiX:
 
 ```powershell
 .\scripts\package-windows.ps1 -PackageType exe -SkipTests
 ```
 
-Saidas geradas:
+Saida gerada:
 
-- `dist/windows/installer/EstoqueTI Desktop Setup.exe`: instalador Windows com atalho e desinstalador.
-- `dist/windows/app-image`: versao portatil gerada no mesmo processo.
+- `dist/windows/EstoqueTI Desktop.exe`: instalador Windows unico, sempre sobrescrito no mesmo caminho a cada novo build.
 
 Opcoes adicionais:
 

@@ -1,8 +1,10 @@
 package br.com.estoqueti.repository.impl;
 
 import br.com.estoqueti.model.entity.User;
+import br.com.estoqueti.model.enums.Role;
 import br.com.estoqueti.repository.UserRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +15,16 @@ public class JpaUserRepository implements UserRepository {
 
     public JpaUserRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
+    }
+
+    @Override
+    public Optional<User> findById(Long id) {
+        return Optional.ofNullable(entityManager.find(User.class, id));
+    }
+
+    @Override
+    public Optional<User> findByIdForUpdate(Long id) {
+        return Optional.ofNullable(entityManager.find(User.class, id, LockModeType.PESSIMISTIC_WRITE));
     }
 
     @Override
@@ -47,6 +59,18 @@ public class JpaUserRepository implements UserRepository {
                 .getSingleResult();
 
         return count != null && count > 0;
+    }
+
+    @Override
+    public long countActiveAdmins() {
+        Long count = entityManager.createQuery(
+                        "SELECT COUNT(u) FROM User u WHERE u.active = true AND u.role = :role",
+                        Long.class
+                )
+                .setParameter("role", Role.ADMIN)
+                .getSingleResult();
+
+        return count == null ? 0L : count;
     }
 
     @Override

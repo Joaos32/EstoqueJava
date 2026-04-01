@@ -16,7 +16,9 @@ import br.com.estoqueti.util.UiSupport;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
@@ -32,6 +34,7 @@ import javafx.scene.layout.VBox;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.UnaryOperator;
 
 public class EquipmentController {
@@ -39,6 +42,8 @@ public class EquipmentController {
     private static final DateTimeFormatter ENTRY_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     private final EquipmentService equipmentService = new EquipmentService();
+    private AuthenticatedUserDto authenticatedUser;
+
     @FXML
     private GridPane equipmentLayoutPane;
 
@@ -160,11 +165,16 @@ public class EquipmentController {
     private Button saveEquipmentButton;
 
     @FXML
+    private Button removeEquipmentButton;
+
+    @FXML
     private Label formStatusLabel;
 
     @FXML
     public void initialize() {
+        authenticatedUser = UserSession.requireAuthenticatedUser();
         configureTable();
+        configureSelectionActions();
         configureNumericField(quantityField);
         configureNumericField(minimumStockField);
         statusComboBox.setItems(FXCollections.observableArrayList(EquipmentStatus.values()));
@@ -200,10 +210,42 @@ public class EquipmentController {
     @FXML
     private void handleCreateEquipment() {
         try {
-            EquipmentListItemDto createdEquipment = equipmentService.createEquipment(buildCreateRequest(), UserSession.requireAuthenticatedUser());
+            EquipmentListItemDto createdEquipment = equipmentService.createEquipment(buildCreateRequest(), authenticatedUser);
             formStatusLabel.setText("Equipamento cadastrado com sucesso: " + createdEquipment.internalCode());
             applyStatusStyle("form-status-success");
             clearForm();
+            loadEquipment();
+        } catch (BusinessException exception) {
+            formStatusLabel.setText(exception.getMessage());
+            applyStatusStyle("form-status-error");
+        }
+    }
+
+    @FXML
+    private void handleRemoveEquipment() {
+        EquipmentListItemDto selectedEquipment = equipmentTable.getSelectionModel().getSelectedItem();
+        if (selectedEquipment == null) {
+            formStatusLabel.setText("Selecione um equipamento para excluir.");
+            applyStatusStyle("form-status-error");
+            return;
+        }
+        if (selectedEquipment.quantity() > 0) {
+            formStatusLabel.setText("Somente equipamentos com quantidade zero podem ser excluidos do catalogo.");
+            applyStatusStyle("form-status-error");
+            return;
+        }
+        if (!showConfirmationDialog(
+                "Excluir equipamento",
+                "Remover " + selectedEquipment.internalCode() + " do catalogo?",
+                "O equipamento sera marcado como inativo e deixara de aparecer na consulta principal."
+        )) {
+            return;
+        }
+
+        try {
+            EquipmentListItemDto removedEquipment = equipmentService.deactivateEquipment(selectedEquipment.id(), authenticatedUser);
+            formStatusLabel.setText("Equipamento excluido do catalogo: " + removedEquipment.internalCode());
+            applyStatusStyle("form-status-success");
             loadEquipment();
         } catch (BusinessException exception) {
             formStatusLabel.setText(exception.getMessage());
@@ -256,16 +298,20 @@ public class EquipmentController {
         });
     }
 
+    private void configureSelectionActions() {
+        equipmentTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> updateRemoveButtonState());
+    }
+
     private void configurePermissions() {
-        AuthenticatedUserDto authenticatedUser = UserSession.requireAuthenticatedUser();
         boolean canManageInventory = authenticatedUser.canManageInventory();
 
         accessHintLabel.setText(canManageInventory
-                ? "Seu perfil pode consultar e cadastrar equipamentos no estoque corporativo."
+                ? "Seu perfil pode consultar, cadastrar e excluir equipamentos do catalogo quando eles nao tiverem saldo em estoque."
                 : "Seu perfil possui acesso somente de consulta para equipamentos.");
 
         formFieldsContainer.setDisable(!canManageInventory);
         saveEquipmentButton.setDisable(!canManageInventory);
+        updateRemoveButtonState();
     }
 
     private void configureNumericField(TextField textField) {
@@ -290,6 +336,7 @@ public class EquipmentController {
         List<EquipmentListItemDto> equipments = equipmentService.searchEquipment(buildSearchFilter());
         equipmentTable.setItems(FXCollections.observableArrayList(equipments));
         updateResultsSummary(equipments.size());
+        updateRemoveButtonState();
     }
 
     private EquipmentSearchFilter buildSearchFilter() {
@@ -373,6 +420,21 @@ public class EquipmentController {
         resultsSummaryLabel.setText(resultCount == 1
                 ? "1 equipamento em destaque"
                 : resultCount + " equipamentos em destaque");
+    }
+
+    private void updateRemoveButtonState() {
+        boolean canManageInventory = authenticatedUser != null && authenticatedUser.canManageInventory();
+        removeEquipmentButton.setDisable(!canManageInventory || equipmentTable.getSelectionModel().getSelectedItem() == null);
+    }
+
+    private boolean showConfirmationDialog(String title, String header, String content) {
+        Alert confirmationAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmationAlert.setTitle(title);
+        confirmationAlert.setHeaderText(header);
+        confirmationAlert.setContentText(content);
+
+        Optional<ButtonType> result = confirmationAlert.showAndWait();
+        return result.isPresent() && result.get() == ButtonType.OK;
     }
 
     private String resolveEquipmentStatusStyle(String status) {

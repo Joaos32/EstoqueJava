@@ -4,25 +4,17 @@ import br.com.estoqueti.dto.auth.AuthenticatedUserDto;
 import br.com.estoqueti.session.UserSession;
 import br.com.estoqueti.util.ViewManager;
 import javafx.animation.FadeTransition;
-import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.ParallelTransition;
 import javafx.animation.Timeline;
-import javafx.animation.TranslateTransition;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
-import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
+import javafx.scene.input.InputEvent;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
-import javafx.scene.input.InputEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -32,14 +24,10 @@ import java.util.List;
 
 public class MainLayoutController {
 
-    private static final Duration CONTENT_TRANSITION_DURATION = Duration.millis(220);
-    private static final Duration SCROLL_ANIMATION_DURATION = Duration.millis(180);
+    private static final Duration CONTENT_TRANSITION_DURATION = Duration.millis(120);
     private static final Duration SESSION_CHECK_INTERVAL = Duration.seconds(20);
-    private static final double SCROLL_DELTA_MULTIPLIER = 1.15;
 
-    private Timeline scrollAnimation;
     private Timeline sessionMonitor;
-    private double targetScrollValue;
     private AuthenticatedUserDto authenticatedUser;
     private boolean redirectingToLogin;
 
@@ -137,12 +125,9 @@ public class MainLayoutController {
     }
 
     private void configureContentScroll() {
-        contentScrollPane.setPannable(true);
         contentContainer.setMaxWidth(Double.MAX_VALUE);
-        targetScrollValue = contentScrollPane.getVvalue();
         contentScrollPane.viewportBoundsProperty().addListener((observable, oldBounds, bounds) ->
                 contentContainer.setPrefWidth(bounds.getWidth()));
-        contentScrollPane.addEventFilter(ScrollEvent.SCROLL, this::handleSmoothScroll);
     }
 
     private void configureSessionMonitoring() {
@@ -190,96 +175,26 @@ public class MainLayoutController {
         }
     }
 
-    private void handleSmoothScroll(ScrollEvent event) {
-        if (event.getDeltaY() == 0 || isInsideNestedScrollable(event.getTarget())) {
-            return;
-        }
-
-        Node scrollContent = contentScrollPane.getContent();
-        if (scrollContent == null) {
-            return;
-        }
-
-        Bounds viewportBounds = contentScrollPane.getViewportBounds();
-        double contentHeight = scrollContent.getBoundsInLocal().getHeight();
-        double scrollableHeight = contentHeight - viewportBounds.getHeight();
-        if (scrollableHeight <= 0) {
-            return;
-        }
-
-        double currentBaseValue = scrollAnimation != null && scrollAnimation.getStatus() == Timeline.Status.RUNNING
-                ? targetScrollValue
-                : contentScrollPane.getVvalue();
-        double delta = (event.getDeltaY() * SCROLL_DELTA_MULTIPLIER) / scrollableHeight;
-        targetScrollValue = clamp(currentBaseValue - delta, 0, 1);
-
-        animateScrollTo(targetScrollValue);
-        event.consume();
-    }
-
-    private boolean isInsideNestedScrollable(Object target) {
-        if (!(target instanceof Node node)) {
-            return false;
-        }
-
-        Node current = node;
-        while (current != null && current != contentScrollPane) {
-            if (current instanceof TableView<?> || current instanceof TextArea || current instanceof ScrollPane) {
-                return true;
-            }
-            current = current.getParent();
-        }
-
-        return false;
-    }
-
-    private void animateScrollTo(double destination) {
-        if (scrollAnimation != null) {
-            scrollAnimation.stop();
-        }
-
-        scrollAnimation = new Timeline(
-                new KeyFrame(Duration.ZERO,
-                        new KeyValue(contentScrollPane.vvalueProperty(), contentScrollPane.getVvalue())),
-                new KeyFrame(SCROLL_ANIMATION_DURATION,
-                        new KeyValue(contentScrollPane.vvalueProperty(), destination, Interpolator.EASE_BOTH))
-        );
-        scrollAnimation.play();
-    }
-
     private void showModule(String title, Button activeButton, String viewPath) {
         contentTitleLabel.setText(title);
         setActiveMenu(activeButton);
         Parent content = ViewManager.loadView(viewPath);
-        animateContentSwap(content);
+        swapContent(content);
     }
 
-    private void animateContentSwap(Parent content) {
+    private void swapContent(Parent content) {
         releasePreviousContentBindings();
         prepareContentNode(content);
         content.setOpacity(0);
-        content.setTranslateY(12);
         StackPane.setAlignment(content, Pos.TOP_LEFT);
         contentContainer.getChildren().setAll(content);
-
-        if (contentScrollPane != null) {
-            if (scrollAnimation != null) {
-                scrollAnimation.stop();
-            }
-            targetScrollValue = 0;
-            contentScrollPane.setHvalue(0);
-            contentScrollPane.setVvalue(0);
-        }
+        contentScrollPane.setHvalue(0);
+        contentScrollPane.setVvalue(0);
 
         FadeTransition fadeTransition = new FadeTransition(CONTENT_TRANSITION_DURATION, content);
         fadeTransition.setFromValue(0);
         fadeTransition.setToValue(1);
-
-        TranslateTransition translateTransition = new TranslateTransition(CONTENT_TRANSITION_DURATION, content);
-        translateTransition.setFromY(12);
-        translateTransition.setToY(0);
-
-        new ParallelTransition(fadeTransition, translateTransition).play();
+        fadeTransition.play();
     }
 
     private void prepareContentNode(Parent content) {
@@ -314,9 +229,5 @@ public class MainLayoutController {
         if (!activeButton.getStyleClass().contains("active")) {
             activeButton.getStyleClass().add("active");
         }
-    }
-
-    private double clamp(double value, double min, double max) {
-        return Math.max(min, Math.min(max, value));
     }
 }

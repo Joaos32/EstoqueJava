@@ -13,7 +13,11 @@ import br.com.estoqueti.repository.UserRepository;
 import br.com.estoqueti.repository.impl.JpaAuditLogRepository;
 import br.com.estoqueti.repository.impl.JpaUserRepository;
 import br.com.estoqueti.util.PasswordUtils;
+import org.postgresql.util.PSQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.sql.SQLTransientConnectionException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -24,6 +28,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class AuthenticationService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationService.class);
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final Duration LOGIN_BLOCK_DURATION = Duration.ofMinutes(15);
     private static final int MAX_USERNAME_LENGTH = 80;
@@ -33,6 +38,16 @@ public class AuthenticationService {
     public AuthenticatedUserDto authenticate(LoginRequest request) {
         validateRequest(request);
 
+        try {
+            return doAuthenticate(request);
+        } catch (AuthenticationException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            throw translateInfrastructureFailure(exception);
+        }
+    }
+
+    private AuthenticatedUserDto doAuthenticate(LoginRequest request) {
         Instant now = Instant.now();
         cleanupExpiredFailures(now);
 
@@ -161,6 +176,15 @@ public class AuthenticationService {
         FAILED_LOGIN_ATTEMPTS.entrySet().removeIf(entry -> shouldResetFailures(entry.getValue(), now));
     }
 
+    public static void clearFailedAttemptsForUsername(String username) {
+        if (username == null || username.isBlank()) {
+            return;
+        }
+
+        String normalizedUsername = username.trim().toLowerCase(Locale.ROOT);
+        FAILED_LOGIN_ATTEMPTS.keySet().removeIf(attemptKey -> attemptKey.username().equals(normalizedUsername));
+    }
+
     private boolean shouldResetFailures(FailedLoginState state, Instant now) {
         if (state == null) {
             return true;
@@ -187,6 +211,53 @@ public class AuthenticationService {
             return sanitizedWorkstation.substring(0, MAX_WORKSTATION_LENGTH);
         }
         return sanitizedWorkstation;
+    }
+
+    private AuthenticationException translateInfrastructureFailure(RuntimeException exception) {
+        Throwable rootCause = resolveRootCause(exception);
+        LOGGER.error("Falha de infraestrutura ao autenticar usuario.", exception);
+        return new AuthenticationException(resolveInfrastructureMessage(rootCause), exception);
+    }
+
+    private String resolveInfrastructureMessage(Throwable rootCause) {
+        String defaultMessage = "Nao foi possivel concluir o login agora. Verifique se o PostgreSQL esta ativo e se a configuracao do banco esta correta.";
+        if (rootCause == null) {
+            return defaultMessage;
+        }
+
+        if (rootCause instanceof PSQLException postgresqlException) {
+            String message = normalizeErrorMessage(postgresqlException.getMessage());
+            if (message.contains("password is an empty string")) {
+                return "Banco nao configurado. Preencha a senha em config/application-local.properties ou app/config/application-local.properties e reinicie o app.";
+            }
+            if (message.contains("password authentication failed")) {
+                return "Nao foi possivel autenticar no PostgreSQL com as credenciais configuradas. Revise usuario e senha do banco.";
+            }
+            if (message.contains("connection refused") || message.contains("the connection attempt failed") || message.contains("could not connect to server")) {
+                return "Nao foi possivel conectar ao PostgreSQL. Verifique se o servidor esta em execucao e acessivel.";
+            }
+        }
+
+        if (rootCause instanceof SQLTransientConnectionException) {
+            return "O banco de dados nao respondeu a tempo. Verifique a conexao com o PostgreSQL e tente novamente.";
+        }
+
+        return defaultMessage;
+    }
+
+    private Throwable resolveRootCause(Throwable throwable) {
+        Throwable current = throwable;
+        while (current.getCause() != null && current.getCause() != current) {
+            current = current.getCause();
+        }
+        return current;
+    }
+
+    private String normalizeErrorMessage(String message) {
+        if (message == null) {
+            return "";
+        }
+        return message.toLowerCase(Locale.ROOT);
     }
 
     private AuthenticationException invalidCredentials() {

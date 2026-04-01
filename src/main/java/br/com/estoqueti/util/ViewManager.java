@@ -2,10 +2,12 @@ package br.com.estoqueti.util;
 
 import br.com.estoqueti.AppLauncher;
 import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -14,7 +16,7 @@ import java.net.URL;
 
 public final class ViewManager {
 
-    private static final Duration SCENE_TRANSITION_DURATION = Duration.millis(260);
+    private static final Duration SCENE_TRANSITION_DURATION = Duration.millis(140);
     private static final double LOGIN_MIN_WIDTH = 900;
     private static final double LOGIN_MIN_HEIGHT = 640;
     private static final double MAIN_MIN_WIDTH = 980;
@@ -28,6 +30,7 @@ public final class ViewManager {
     public static final String MOVEMENT_VIEW = "/br/com/estoqueti/view/fxml/movement-view.fxml";
     public static final String REPORT_VIEW = "/br/com/estoqueti/view/fxml/report-view.fxml";
     private static final String STYLESHEET = "/br/com/estoqueti/view/css/application.css";
+    private static final String APP_ICON = "/br/com/estoqueti/view/image/logo-nitrolux.png";
 
     private ViewManager() {
     }
@@ -65,14 +68,15 @@ public final class ViewManager {
         Scene scene = new Scene(root, width, height);
         scene.getStylesheets().add(resolveResource(STYLESHEET).toExternalForm());
         stage.setTitle(title);
+        stage.getIcons().setAll(new Image(resolveResource(APP_ICON).toExternalForm()));
         stage.setScene(scene);
         stage.setMinWidth(minWidth);
         stage.setMinHeight(minHeight);
         stage.centerOnScreen();
         stage.setIconified(false);
         stage.show();
-        stage.toFront();
         stage.requestFocus();
+        Platform.runLater(stage::requestFocus);
 
         FadeTransition fadeTransition = new FadeTransition(SCENE_TRANSITION_DURATION, root);
         fadeTransition.setFromValue(0);

@@ -148,6 +148,41 @@ public class EquipmentService {
         });
     }
 
+    public EquipmentListItemDto deactivateEquipment(Long equipmentId, AuthenticatedUserDto authenticatedUser) {
+        if (authenticatedUser == null || !authenticatedUser.canManageInventory()) {
+            throw new AuthorizationException("Somente administradores e tecnicos podem excluir equipamentos.");
+        }
+        if (equipmentId == null) {
+            throw new ValidationException("Selecione um equipamento para excluir.");
+        }
+
+        return JpaExecutor.transaction(entityManager -> {
+            EquipmentRepository equipmentRepository = new JpaEquipmentRepository(entityManager);
+            AuditLogRepository auditLogRepository = new JpaAuditLogRepository(entityManager);
+
+            Equipment equipment = equipmentRepository.findActiveByIdForUpdate(equipmentId)
+                    .orElseThrow(() -> new ValidationException("Selecione um equipamento ativo valido para excluir."));
+
+            if (equipment.getQuantity() > 0) {
+                throw new ValidationException("Somente equipamentos com quantidade zero podem ser excluidos do catalogo.");
+            }
+
+            equipment.deactivate();
+            equipmentRepository.save(equipment);
+
+            auditLogRepository.save(AuditLog.of(
+                    entityManager.getReference(User.class, authenticatedUser.id()),
+                    AuditAction.EXCLUSAO,
+                    "equipment",
+                    equipment.getId(),
+                    "Inativacao de equipamento realizada: " + equipment.getInternalCode(),
+                    WorkstationUtils.resolveStationIdentifier()
+            ));
+
+            return EquipmentMapper.toListItemDto(equipment);
+        });
+    }
+
     private void validateRequest(EquipmentCreateRequest request) {
         if (request == null) {
             throw new ValidationException("Os dados do equipamento sao obrigatorios.");

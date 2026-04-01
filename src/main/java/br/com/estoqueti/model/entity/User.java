@@ -60,6 +60,10 @@ public class User {
         this.lastLoginAt = loginAt;
     }
 
+    public void deactivate() {
+        this.active = false;
+    }
+
     public Long getId() {
         return id;
     }

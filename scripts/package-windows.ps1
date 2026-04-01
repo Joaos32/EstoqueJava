@@ -79,7 +79,7 @@ function Resolve-MavenRepositoryArgument {
         Remove-Item $probeFile -Force -ErrorAction SilentlyContinue
         return $null
     } catch {
-        $fallbackRepository = Join-Path $ProjectRoot "target\maven-repo"
+        $fallbackRepository = Join-Path $ProjectRoot ".m2\repository"
         New-Item -ItemType Directory -Path $fallbackRepository -Force | Out-Null
         return "-Dmaven.repo.local=$fallbackRepository"
     }
@@ -128,7 +128,8 @@ function New-AppImage {
         [string]$MainJarName,
         [string]$MainClass,
         [string]$Vendor,
-        [string]$Description
+        [string]$Description,
+        [string]$IconPath
     )
 
     if (Test-Path $AppImageOutput) {
@@ -146,7 +147,9 @@ function New-AppImage {
         "--app-version", $AppVersion,
         "--vendor", $Vendor,
         "--description", $Description,
+        "--icon", $IconPath,
         "--java-options", "-Dfile.encoding=UTF-8",
+        "--java-options", "-Dprism.order=d3d,sw",
         "--java-options", "--module-path",
         "--java-options", '$APPDIR',
         "--java-options", "--add-modules",
@@ -175,7 +178,8 @@ function New-CustomInstaller {
         [string]$InstallerOutput,
         [string]$AppName,
         [string]$AppVersion,
-        [string]$Vendor
+        [string]$Vendor,
+        [string]$IconPath
     )
 
     $templatePath = Join-Path $ProjectRoot "scripts\windows-installer\InstallerTemplate.cs"
@@ -215,7 +219,7 @@ function New-CustomInstaller {
     }
     New-Item -ItemType Directory -Path $InstallerOutput -Force | Out-Null
 
-    $installerPath = Join-Path $InstallerOutput ($AppName + " Setup.exe")
+    $installerPath = Join-Path $InstallerOutput ($AppName + ".exe")
     $cscPath = Resolve-CscPath
     $compilerArguments = @(
         "/nologo",
@@ -223,6 +227,7 @@ function New-CustomInstaller {
         "/optimize+",
         "/out:$installerPath",
         "/resource:$payloadZip,EstoqueTIInstaller.Payload.zip",
+        "/win32icon:$IconPath",
         "/r:System.Windows.Forms.dll",
         "/r:System.IO.Compression.dll",
         "/r:System.IO.Compression.FileSystem.dll",
@@ -249,7 +254,8 @@ function New-MsiInstaller {
         [string]$MainClass,
         [string]$Vendor,
         [string]$Description,
-        [string]$UpgradeUuid
+        [string]$UpgradeUuid,
+        [string]$IconPath
     )
 
     $candleCommand = Get-Command candle.exe -ErrorAction SilentlyContinue
@@ -273,7 +279,9 @@ function New-MsiInstaller {
         "--app-version", $AppVersion,
         "--vendor", $Vendor,
         "--description", $Description,
+        "--icon", $IconPath,
         "--java-options", "-Dfile.encoding=UTF-8",
+        "--java-options", "-Dprism.order=d3d,sw",
         "--java-options", "--module-path",
         "--java-options", '$APPDIR',
         "--java-options", "--add-modules",
@@ -304,8 +312,9 @@ function New-MsiInstaller {
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $inputDir = Join-Path $projectRoot "target\jpackage\input"
 $distributionRoot = Join-Path $projectRoot "dist\windows"
-$appImageOutput = Join-Path $distributionRoot "app-image"
-$installerOutput = Join-Path $distributionRoot "installer"
+$intermediatePackagingRoot = Join-Path $projectRoot "target\packaging"
+$appImageOutput = if ($PackageType -eq "exe") { Join-Path $intermediatePackagingRoot "app-image" } else { Join-Path $distributionRoot "app-image" }
+$installerOutput = if ($PackageType -eq "exe") { $distributionRoot } else { Join-Path $distributionRoot "installer" }
 $appName = "EstoqueTI Desktop"
 $mainJarName = "estoqueti-desktop-1.0.0-SNAPSHOT.jar"
 $mainJarPath = Join-Path $projectRoot ("target\" + $mainJarName)
@@ -313,24 +322,53 @@ $mainClass = "br.com.estoqueti.AppLauncher"
 $vendor = "EstoqueTI"
 $description = "Sistema desktop para controle de estoque de equipamentos de TI"
 $upgradeUuid = "8d8d8f5a-17f6-47b5-bb80-5c9a989c2c46"
+$appIconPath = Join-Path $projectRoot "scripts\windows-installer\assets\logo-nitrolux.ico"
 
 if (Test-Path $inputDir) {
     Remove-Item $inputDir -Recurse -Force
 }
 New-Item -ItemType Directory -Path $inputDir -Force | Out-Null
+
+if ($PackageType -eq "exe") {
+    if (Test-Path $distributionRoot) {
+        Get-ChildItem -Path $distributionRoot -Force | Remove-Item -Recurse -Force
+    }
+    if (Test-Path $appImageOutput) {
+        Remove-Item $appImageOutput -Recurse -Force
+    }
+}
+
 New-Item -ItemType Directory -Path $distributionRoot -Force | Out-Null
 
 $mavenPath = Resolve-MavenPath
 $jpackagePath = Resolve-JPackagePath
 $repositoryArgument = Resolve-MavenRepositoryArgument -ProjectRoot $projectRoot
 Invoke-MavenBuild -MavenPath $mavenPath -ProjectRoot $projectRoot -SkipTestsFlag $SkipTests.IsPresent -RepositoryArgument $repositoryArgument
+if (-not (Test-Path $appIconPath)) {
+    throw "Icone Windows nao encontrado em $appIconPath"
+}
+
+$configInputDir = Join-Path $inputDir "config"
+$configTemplatePath = Join-Path $projectRoot "src\main\resources\application-local.properties.example"
+$configOverrideCandidates = @(
+    (Join-Path $projectRoot "config\application-local.properties"),
+    (Join-Path $projectRoot "application-local.properties")
+)
+New-Item -ItemType Directory -Path $configInputDir -Force | Out-Null
+$configOverridePath = $configOverrideCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+if ($configOverridePath) {
+    Copy-Item $configOverridePath (Join-Path $configInputDir "application-local.properties") -Force
+}
+if (Test-Path $configTemplatePath) {
+    Copy-Item $configTemplatePath (Join-Path $configInputDir "application-local.properties.example") -Force
+}
 
 if (-not (Test-Path $mainJarPath)) {
     throw "Jar principal nao encontrado em $mainJarPath"
 }
 
 Copy-Item $mainJarPath $inputDir -Force
-$appImageExecutable = New-AppImage -JPackagePath $jpackagePath -ProjectRoot $projectRoot -InputDirectory $inputDir -AppImageOutput $appImageOutput -AppName $appName -AppVersion $AppVersion -MainJarName $mainJarName -MainClass $mainClass -Vendor $vendor -Description $description
+$appImageExecutable = New-AppImage -JPackagePath $jpackagePath -ProjectRoot $projectRoot -InputDirectory $inputDir -AppImageOutput $appImageOutput -AppName $appName -AppVersion $AppVersion -MainJarName $mainJarName -MainClass $mainClass -Vendor $vendor -Description $description -IconPath $appIconPath
 
 if ($PackageType -eq "app-image") {
     Write-Host "App-image gerado com sucesso em: $appImageExecutable"
@@ -338,10 +376,16 @@ if ($PackageType -eq "app-image") {
 }
 
 if ($PackageType -eq "msi") {
-    $msiPath = New-MsiInstaller -JPackagePath $jpackagePath -ProjectRoot $projectRoot -InputDirectory $inputDir -InstallerOutput $installerOutput -AppName $appName -AppVersion $AppVersion -MainJarName $mainJarName -MainClass $mainClass -Vendor $vendor -Description $description -UpgradeUuid $upgradeUuid
+    $msiPath = New-MsiInstaller -JPackagePath $jpackagePath -ProjectRoot $projectRoot -InputDirectory $inputDir -InstallerOutput $installerOutput -AppName $appName -AppVersion $AppVersion -MainJarName $mainJarName -MainClass $mainClass -Vendor $vendor -Description $description -UpgradeUuid $upgradeUuid -IconPath $appIconPath
     Write-Host "Instalador MSI gerado com sucesso em: $msiPath"
     return
 }
 
-$installerPath = New-CustomInstaller -ProjectRoot $projectRoot -AppImageOutput $appImageOutput -InstallerOutput $installerOutput -AppName $appName -AppVersion $AppVersion -Vendor $vendor
+$installerPath = New-CustomInstaller -ProjectRoot $projectRoot -AppImageOutput $appImageOutput -InstallerOutput $installerOutput -AppName $appName -AppVersion $AppVersion -Vendor $vendor -IconPath $appIconPath
+if (Test-Path $appImageOutput) {
+    Remove-Item $appImageOutput -Recurse -Force
+}
 Write-Host "Instalador EXE gerado com sucesso em: $installerPath"
+
+
+

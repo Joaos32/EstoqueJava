@@ -17,6 +17,8 @@ public final class ApplicationProperties {
     private static final String BASE_RESOURCE_NAME = "application.properties";
     private static final String LOCAL_FILE_NAME = "application-local.properties";
     private static final String CONFIG_FILE_PROPERTY = "estoqueti.config.file";
+    private static final Path PACKAGED_CONFIG_DIRECTORY_LOCAL_FILE = Path.of("app", "config", LOCAL_FILE_NAME);
+    private static final Path PACKAGED_ROOT_LOCAL_FILE = Path.of("app", LOCAL_FILE_NAME);
     private static final Path CONFIG_DIRECTORY_LOCAL_FILE = Path.of("config", LOCAL_FILE_NAME);
     private static final Path ROOT_LOCAL_FILE = Path.of(LOCAL_FILE_NAME);
     private static final Properties PROPERTIES = new Properties();
@@ -96,6 +98,8 @@ public final class ApplicationProperties {
             return;
         }
 
+        loadOptionalFile(PACKAGED_CONFIG_DIRECTORY_LOCAL_FILE);
+        loadOptionalFile(PACKAGED_ROOT_LOCAL_FILE);
         loadOptionalFile(CONFIG_DIRECTORY_LOCAL_FILE);
         loadOptionalFile(ROOT_LOCAL_FILE);
     }

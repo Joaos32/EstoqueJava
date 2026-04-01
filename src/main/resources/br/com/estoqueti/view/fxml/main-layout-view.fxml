@@ -4,6 +4,8 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Priority?>
@@ -22,8 +24,19 @@
             <padding>
                 <Insets top="24.0" right="18.0" bottom="24.0" left="18.0" />
             </padding>
-            <Label text="ESTOQUETI" styleClass="sidebar-brand" />
-            <Label text="Desktop corporativo" styleClass="sidebar-subtitle" />
+            <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="sidebar-brand-block">
+                <StackPane styleClass="sidebar-brand-mark">
+                    <ImageView fitWidth="42.0" fitHeight="42.0" preserveRatio="true" smooth="true">
+                        <image>
+                            <Image url="@/br/com/estoqueti/view/image/logo-nitrolux.png" />
+                        </image>
+                    </ImageView>
+                </StackPane>
+                <VBox spacing="2.0" styleClass="sidebar-brand-copy">
+                    <Label text="NITROLUX" styleClass="sidebar-brand" />
+                    <Label text="EstoqueTI Desktop" styleClass="sidebar-subtitle" />
+                </VBox>
+            </HBox>
             <Label text="NAVEGACAO" styleClass="sidebar-section-label" />
             <VBox spacing="8.0">
                 <Button fx:id="dashboardMenuButton" text="Dashboard" onAction="#handleDashboardMenu" styleClass="menu-button" maxWidth="1.7976931348623157E308" />
@@ -61,7 +74,6 @@
                     fitToHeight="true"
                     hbarPolicy="AS_NEEDED"
                     vbarPolicy="AS_NEEDED"
-                    pannable="true"
                     styleClass="content-scroll"
                     BorderPane.alignment="CENTER">
             <content>

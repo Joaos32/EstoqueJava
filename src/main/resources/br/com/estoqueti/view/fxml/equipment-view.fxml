@@ -90,7 +90,7 @@
                 <FlowPane alignment="CENTER_LEFT" hgap="10.0" vgap="10.0" styleClass="table-toolbar">
                     <Button text="Aplicar filtros" onAction="#handleSearch" styleClass="primary-button" />
                     <Button text="Limpar filtros" onAction="#handleClearFilters" styleClass="secondary-button" />
-
+                    <Button fx:id="removeEquipmentButton" text="Excluir selecionado" onAction="#handleRemoveEquipment" styleClass="danger-button" />
                     <Label fx:id="resultsSummaryLabel" styleClass="results-chip" />
                 </FlowPane>
 
