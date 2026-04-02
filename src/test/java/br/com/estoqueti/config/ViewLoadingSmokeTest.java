@@ -7,6 +7,7 @@ import br.com.estoqueti.util.ViewManager;
 import javafx.application.Platform;
 import javafx.scene.Parent;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +26,9 @@ class ViewLoadingSmokeTest {
             Platform.startup(startupLatch::countDown);
         } catch (IllegalStateException exception) {
             startupLatch.countDown();
+        } catch (UnsupportedOperationException exception) {
+            Assumptions.assumeTrue(false, "JavaFX Toolkit indisponivel no ambiente atual: " + exception.getMessage());
+            return;
         }
 
         if (!startupLatch.await(10, TimeUnit.SECONDS)) {

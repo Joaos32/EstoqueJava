@@ -53,7 +53,9 @@ public final class DataSourceFactory {
         config.setMaxLifetime(properties.maxLifetimeMs());
         config.setValidationTimeout(properties.validationTimeoutMs());
         config.setConnectionTestQuery("SELECT 1");
-        config.setInitializationFailTimeout(-1);
+        // Protocol migrations run immediately after pool creation, so we need one usable
+        // connection up front instead of starting the pool in the background.
+        config.setInitializationFailTimeout(1);
         config.setAutoCommit(false);
         config.addDataSourceProperty("ApplicationName", ApplicationProperties.get("app.name", "EstoqueTI Desktop"));
         config.addDataSourceProperty("reWriteBatchedInserts", "true");
