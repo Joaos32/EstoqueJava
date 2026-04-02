@@ -1,4 +1,4 @@
-# EstoqueTI Desktop
+﻿# EstoqueTI Desktop
 
 Sistema desktop corporativo para controle de estoque de equipamentos de TI, desenvolvido em Java 17 com JavaFX, Maven e PostgreSQL.
 
@@ -21,6 +21,8 @@ O projeto foi construido para controlar o ciclo de vida de ativos e perifericos 
 
 - Java 17
 - JavaFX + FXML + CSS
+- Spring Boot (API REST)
+- Springdoc OpenAPI + Swagger UI
 - Maven
 - PostgreSQL
 - JPA/Hibernate
@@ -155,6 +157,19 @@ mvn "-Ddatabase.password=SUA_SENHA" test
 mvn "-Ddatabase.password=SUA_SENHA" javafx:run
 ```
 
+### Subir a API Spring Boot
+
+```powershell
+mvn spring-boot:run
+``` 
+
+Documentacao interativa:
+
+- `http://localhost:8080/swagger-ui/index.html`
+- `http://localhost:8080/v3/api-docs`
+
+Observacao: nesta primeira fase da migracao, operacoes de escrita usam o cabecalho `X-User-Id` para identificar o usuario autenticado.
+
 ### Gerar instalador Windows
 
 Para gerar um unico `.exe` por usuario, sem depender de WiX:
@@ -202,6 +217,7 @@ Opcoes adicionais:
 - [ETAPA 8](docs/etapa-08-dashboard.md)
 - [ETAPA 9](docs/etapa-09-relatorios-pdf-csv.md)
 - [ETAPA 10](docs/etapa-10-revisao-preparacao-github.md)
+- [ETAPA 11](docs/etapa-11-api-spring-boot-swagger.md)
 
 ## Evolucao recomendada
 
@@ -212,3 +228,5 @@ Os proximos incrementos naturais para a V2 sao:
 - paginacao e filtros avancados em tabelas maiores;
 - empacotamento instalavel com `jpackage`;
 - CI com publicacao automatizada de artefatos de release.
+
+
