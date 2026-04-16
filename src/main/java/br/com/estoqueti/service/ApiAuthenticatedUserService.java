@@ -1,4 +1,4 @@
-﻿package br.com.estoqueti.service;
+package br.com.estoqueti.service;
 
 import br.com.estoqueti.config.JpaExecutor;
 import br.com.estoqueti.dto.auth.AuthenticatedUserDto;

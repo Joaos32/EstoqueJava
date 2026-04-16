@@ -366,10 +366,12 @@ public class MovementController {
 
     private void configureTable() {
         movementAtColumn.setCellValueFactory(data -> new SimpleStringProperty(MOVEMENT_FORMATTER.format(data.getValue().movementAt())));
+        movementAtColumn.setCellFactory(UiSupport.centeredTextCellFactory());
         movementTypeColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().movementType().getDisplayName()));
-        movementTypeColumn.setCellFactory(UiSupport.badgeCellFactory(this::resolveMovementBadgeStyle));
+        movementTypeColumn.setCellFactory(UiSupport.centeredBadgeCellFactory(this::resolveMovementBadgeStyle));
         equipmentColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().equipmentInternalCode() + " - " + data.getValue().equipmentName()));
         quantityColumn.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().quantity())));
+        quantityColumn.setCellFactory(UiSupport.centeredTextCellFactory());
         sourceColumn.setCellValueFactory(data -> new SimpleStringProperty(defaultValue(data.getValue().sourceLocationName())));
         destinationColumn.setCellValueFactory(data -> new SimpleStringProperty(defaultValue(data.getValue().destinationLocationName())));
         responsibleColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().responsibleName()));

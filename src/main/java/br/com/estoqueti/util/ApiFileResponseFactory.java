@@ -1,4 +1,4 @@
-﻿package br.com.estoqueti.util;
+package br.com.estoqueti.util;
 
 import br.com.estoqueti.dto.DownloadedFile;
 import org.springframework.core.io.ByteArrayResource;

@@ -1,4 +1,4 @@
-﻿package br.com.estoqueti.dto;
+package br.com.estoqueti.dto;
 
 import java.util.Map;
 

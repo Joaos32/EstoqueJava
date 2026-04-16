@@ -1,5 +1,6 @@
 package br.com.estoqueti.util;
 
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -43,13 +44,69 @@ public final class UiSupport {
     }
 
     public static <S> Callback<TableColumn<S, String>, TableCell<S, String>> badgeCellFactory(Function<String, String> styleResolver) {
+        return badgeCellFactory(styleResolver, Pos.CENTER_LEFT);
+    }
+
+    public static <S> Callback<TableColumn<S, String>, TableCell<S, String>> centeredBadgeCellFactory(Function<String, String> styleResolver) {
+        return badgeCellFactory(styleResolver, Pos.CENTER);
+    }
+
+    public static <S> Callback<TableColumn<S, String>, TableCell<S, String>> alignedTextCellFactory(Pos alignment) {
+        return ignored -> new TableCell<>() {
+            private final Label valueLabel = new Label();
+            private final StackPane container = new StackPane(valueLabel);
+
+            {
+                valueLabel.textFillProperty().bind(textFillProperty());
+                container.setAlignment(alignment);
+                container.setMaxWidth(Double.MAX_VALUE);
+                container.prefWidthProperty().bind(Bindings.createDoubleBinding(
+                        () -> Math.max(0, getWidth() - snappedLeftInset() - snappedRightInset()),
+                        widthProperty()
+                ));
+                setAlignment(alignment);
+                setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                setGraphic(null);
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null || item.isBlank()) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+
+                valueLabel.setText(item);
+                setText(null);
+                setGraphic(container);
+            }
+        };
+    }
+
+    public static <S> Callback<TableColumn<S, String>, TableCell<S, String>> centeredTextCellFactory() {
+        return alignedTextCellFactory(Pos.CENTER);
+    }
+
+    public static <S> Callback<TableColumn<S, String>, TableCell<S, String>> badgeCellFactory(
+            Function<String, String> styleResolver,
+            Pos alignment
+    ) {
         return ignored -> new TableCell<>() {
             private final Label badge = new Label();
             private final StackPane container = new StackPane(badge);
 
             {
                 badge.getStyleClass().add("table-badge");
-                container.setAlignment(Pos.CENTER_LEFT);
+                setAlignment(alignment);
+                container.setAlignment(alignment);
+                container.setMaxWidth(Double.MAX_VALUE);
+                container.prefWidthProperty().bind(Bindings.createDoubleBinding(
+                        () -> Math.max(0, getWidth() - snappedLeftInset() - snappedRightInset()),
+                        widthProperty()
+                ));
                 setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                 setGraphic(null);
             }

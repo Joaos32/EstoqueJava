@@ -1,4 +1,4 @@
-﻿package br.com.estoqueti.controller;
+package br.com.estoqueti.controller;
 
 import br.com.estoqueti.dto.DownloadedFile;
 import br.com.estoqueti.dto.auth.AuthenticatedUserDto;

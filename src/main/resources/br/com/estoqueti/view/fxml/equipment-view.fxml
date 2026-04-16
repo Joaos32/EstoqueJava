@@ -96,15 +96,15 @@
 
                 <TableView fx:id="equipmentTable" VBox.vgrow="ALWAYS" styleClass="table-card">
                     <columns>
-                        <TableColumn fx:id="internalCodeColumn" text="Codigo" prefWidth="110.0" />
+                        <TableColumn fx:id="internalCodeColumn" text="Codigo" prefWidth="110.0" style="-fx-alignment: CENTER;" />
                         <TableColumn fx:id="nameColumn" text="Equipamento" prefWidth="220.0" />
                         <TableColumn fx:id="categoryColumn" text="Categoria" prefWidth="120.0" />
-                        <TableColumn fx:id="statusColumn" text="Status" prefWidth="130.0" />
-                        <TableColumn fx:id="quantityColumn" text="Qtd." prefWidth="70.0" />
-                        <TableColumn fx:id="minimumStockColumn" text="Min." prefWidth="70.0" />
+                        <TableColumn fx:id="statusColumn" text="Status" prefWidth="130.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="quantityColumn" text="Qtd." prefWidth="70.0" style="-fx-alignment: CENTER;" />
+                        <TableColumn fx:id="minimumStockColumn" text="Min." prefWidth="70.0" style="-fx-alignment: CENTER;" />
                         <TableColumn fx:id="locationColumn" text="Localizacao" prefWidth="150.0" />
                         <TableColumn fx:id="responsibleColumn" text="Responsavel" prefWidth="150.0" />
-                        <TableColumn fx:id="entryDateColumn" text="Entrada" prefWidth="95.0" />
+                        <TableColumn fx:id="entryDateColumn" text="Entrada" prefWidth="95.0" style="-fx-alignment: CENTER;" />
                     </columns>
                 </TableView>
             </VBox>

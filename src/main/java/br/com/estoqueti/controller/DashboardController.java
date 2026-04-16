@@ -157,14 +157,19 @@ public class DashboardController {
         lowStockNameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().name()));
         lowStockLocationColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().locationName()));
         lowStockQuantityColumn.setCellValueFactory(data -> new SimpleStringProperty(formatInteger(data.getValue().quantity())));
+        lowStockQuantityColumn.setCellFactory(UiSupport.centeredTextCellFactory());
         lowStockMinimumColumn.setCellValueFactory(data -> new SimpleStringProperty(formatInteger(data.getValue().minimumStock())));
+        lowStockMinimumColumn.setCellFactory(UiSupport.centeredTextCellFactory());
         lowStockGapColumn.setCellValueFactory(data -> new SimpleStringProperty(formatInteger(data.getValue().stockGap())));
+        lowStockGapColumn.setCellFactory(UiSupport.centeredTextCellFactory());
 
         recentMovementDateColumn.setCellValueFactory(data -> new SimpleStringProperty(DATE_TIME_FORMATTER.format(data.getValue().movementAt().toLocalDateTime())));
+        recentMovementDateColumn.setCellFactory(UiSupport.centeredTextCellFactory());
         recentMovementTypeColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().movementType().getDisplayName()));
-        recentMovementTypeColumn.setCellFactory(UiSupport.badgeCellFactory(this::resolveMovementBadgeStyle));
+        recentMovementTypeColumn.setCellFactory(UiSupport.centeredBadgeCellFactory(this::resolveMovementBadgeStyle));
         recentMovementEquipmentColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().equipmentInternalCode() + " - " + data.getValue().equipmentName()));
         recentMovementQuantityColumn.setCellValueFactory(data -> new SimpleStringProperty(formatInteger(data.getValue().quantity())));
+        recentMovementQuantityColumn.setCellFactory(UiSupport.centeredTextCellFactory());
         recentMovementRouteColumn.setCellValueFactory(data -> new SimpleStringProperty(buildRouteLabel(data.getValue())));
         recentMovementResponsibleColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().responsibleName()));
 

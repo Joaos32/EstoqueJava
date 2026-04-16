@@ -1,4 +1,4 @@
-﻿package br.com.estoqueti.exception;
+package br.com.estoqueti.exception;
 
 import br.com.estoqueti.dto.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;

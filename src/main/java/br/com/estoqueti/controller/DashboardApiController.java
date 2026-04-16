@@ -1,4 +1,4 @@
-﻿package br.com.estoqueti.controller;
+package br.com.estoqueti.controller;
 
 import br.com.estoqueti.dto.dashboard.DashboardSummaryDto;
 import br.com.estoqueti.service.DashboardService;

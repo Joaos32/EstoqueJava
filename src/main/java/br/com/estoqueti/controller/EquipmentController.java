@@ -262,15 +262,23 @@ public class EquipmentController {
 
     private void configureTable() {
         internalCodeColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().internalCode()));
+        internalCodeColumn.setStyle("-fx-alignment: CENTER;");
         nameColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().name()));
         categoryColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().categoryName()));
         statusColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().status().getDisplayName()));
-        statusColumn.setCellFactory(UiSupport.badgeCellFactory(this::resolveEquipmentStatusStyle));
+        statusColumn.setStyle("-fx-alignment: CENTER;");
+        statusColumn.setCellFactory(UiSupport.centeredBadgeCellFactory(this::resolveEquipmentStatusStyle));
         quantityColumn.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().quantity())));
+        quantityColumn.setStyle("-fx-alignment: CENTER;");
+        quantityColumn.setCellFactory(UiSupport.centeredTextCellFactory());
         minimumStockColumn.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().minimumStock())));
+        minimumStockColumn.setStyle("-fx-alignment: CENTER;");
+        minimumStockColumn.setCellFactory(UiSupport.centeredTextCellFactory());
         locationColumn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().locationName()));
         responsibleColumn.setCellValueFactory(data -> new SimpleStringProperty(defaultValue(data.getValue().responsibleName())));
         entryDateColumn.setCellValueFactory(data -> new SimpleStringProperty(ENTRY_DATE_FORMATTER.format(data.getValue().entryDate())));
+        entryDateColumn.setStyle("-fx-alignment: CENTER;");
+        entryDateColumn.setCellFactory(UiSupport.centeredTextCellFactory());
         equipmentTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         equipmentTable.setPlaceholder(UiSupport.createTablePlaceholder(

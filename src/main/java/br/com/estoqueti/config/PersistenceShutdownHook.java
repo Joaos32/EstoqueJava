@@ -1,4 +1,4 @@
-﻿package br.com.estoqueti.config;
+package br.com.estoqueti.config;
 
 import jakarta.annotation.PreDestroy;
 import org.springframework.stereotype.Component;

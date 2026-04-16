@@ -1,4 +1,4 @@
-﻿package br.com.estoqueti.dto;
+package br.com.estoqueti.dto;
 
 public record RecoverPasswordRequest(
         String targetUsername,

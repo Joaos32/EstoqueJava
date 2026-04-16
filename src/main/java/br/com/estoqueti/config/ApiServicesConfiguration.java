@@ -1,4 +1,4 @@
-﻿package br.com.estoqueti.config;
+package br.com.estoqueti.config;
 
 import br.com.estoqueti.service.ApiAuthenticatedUserService;
 import br.com.estoqueti.service.ApiFileExportService;

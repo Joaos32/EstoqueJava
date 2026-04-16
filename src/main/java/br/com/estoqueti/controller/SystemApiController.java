@@ -1,4 +1,4 @@
-﻿package br.com.estoqueti.controller;
+package br.com.estoqueti.controller;
 
 import br.com.estoqueti.config.DatabaseConnectionStatus;
 import br.com.estoqueti.service.DatabaseConnectivityService;
